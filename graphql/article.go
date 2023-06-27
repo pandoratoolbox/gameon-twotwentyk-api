@@ -187,3 +187,72 @@ func GetArticle(ctx context.Context, id int64) (models.Article, error) {
 
 	return data, nil
 }
+
+func SearchArticles(ctx context.Context, q string) ([]models.Article, error) {
+	var data []models.Article
+	gq := fragment_article + `
+	query SearchArticles {
+	article(where: { tags: { contains: $q } }) {
+		...Article
+	}
+}
+`
+
+	input := struct {
+		Q string `json:"q"`
+	}{
+		Q: q,
+	}
+
+	js, err := json.Marshal(input)
+	if err != nil {
+		return data, err
+	}
+
+	res, err := Graph.GraphQL(ctx, gq, js, nil)
+	if err != nil {
+		return data, err
+	}
+
+	var out struct {
+		Article []models.Article
+	}
+
+	err = json.Unmarshal(res.Data, &out)
+	if err != nil {
+		return data, err
+	}
+
+	data = out.Article
+
+	return data, nil
+}
+
+func ListArticles(ctx context.Context) ([]models.Article, error) {
+	var data []models.Article
+	gq := fragment_article + `
+	query ListArticles {
+	article() {
+		...Article
+	}
+}
+`
+
+	res, err := Graph.GraphQL(ctx, gq, nil, nil)
+	if err != nil {
+		return data, err
+	}
+
+	var out struct {
+		Article []models.Article
+	}
+
+	err = json.Unmarshal(res.Data, &out)
+	if err != nil {
+		return data, err
+	}
+
+	data = out.Article
+
+	return data, nil
+}

@@ -44,7 +44,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := store.GetUserByUsername(ctx, *input.Username)
+	user, err := store.GetUserByEmail(ctx, *input.Username)
 	if err != nil {
 		ServeError(w, err.Error(), 400)
 		return
@@ -82,7 +82,10 @@ func Login(w http.ResponseWriter, r *http.Request) {
 func Register(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	data := models.User{}
+	data := struct {
+		models.User
+		Sign string `json:"sign"`
+	}{}
 
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&data)
@@ -95,10 +98,11 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	user := models.User{
 		UserData: models.UserData{
-			Username: data.Username,
-			Password: data.Password,
-			Email:    data.Email,
-			RoleIds:  &roles,
+			Username:      data.Username,
+			Password:      data.Password,
+			Email:         data.Email,
+			RoleIds:       &roles,
+			WalletAddress: data.WalletAddress,
 		},
 	}
 

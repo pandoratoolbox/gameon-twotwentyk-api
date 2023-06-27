@@ -10,17 +10,17 @@ import (
 	"github.com/pandoratoolbox/json"
 )
 
-func GetArticle(w http.ResponseWriter, r *http.Request) {
+func GetMarketplaceListing(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	q := chi.URLParam(r, "article_id")
+	q := chi.URLParam(r, "marketplace_listing_id")
 	id, err := strconv.ParseInt(q, 10, 64)
 	if err != nil {
 		ServeError(w, err.Error(), 500)
 		return
 	}
 
-	data, err := store.GetArticle(ctx, id)
+	data, err := store.GetMarketplaceListing(ctx, id)
 	if err != nil {
 		ServeError(w, err.Error(), 500)
 		return
@@ -29,10 +29,10 @@ func GetArticle(w http.ResponseWriter, r *http.Request) {
 	ServeJSON(w, data)
 }
 
-func NewArticle(w http.ResponseWriter, r *http.Request) {
+func NewMarketplaceListing(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	input := models.Article{}
+	input := models.MarketplaceListing{}
 
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&input)
@@ -41,7 +41,7 @@ func NewArticle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = store.NewArticle(ctx, &input)
+	err = store.NewMarketplaceListing(ctx, &input)
 	if err != nil {
 		ServeError(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -50,10 +50,10 @@ func NewArticle(w http.ResponseWriter, r *http.Request) {
 	ServeJSON(w, input)
 }
 
-func UpdateArticle(w http.ResponseWriter, r *http.Request) {
+func UpdateMarketplaceListing(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	data := models.Article{}
+	data := models.MarketplaceListing{}
 
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&data)
@@ -62,7 +62,7 @@ func UpdateArticle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = store.UpdateArticle(ctx, data)
+	err = store.UpdateMarketplaceListing(ctx, data)
 	if err != nil {
 		ServeError(w, err.Error(), 400)
 		return
@@ -71,17 +71,17 @@ func UpdateArticle(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 }
 
-func DeleteArticle(w http.ResponseWriter, r *http.Request) {
+func DeleteMarketplaceListing(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	q := chi.URLParam(r, "article_id")
+	q := chi.URLParam(r, "marketplace_listing_id")
 	id, err := strconv.ParseInt(q, 10, 64)
 	if err != nil {
 		ServeError(w, err.Error(), 500)
 		return
 	}
 
-	err = store.DeleteArticle(ctx, id)
+	err = store.DeleteMarketplaceListing(ctx, id)
 	if err != nil {
 		ServeError(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -90,44 +90,29 @@ func DeleteArticle(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 }
 
-func SearchArticles(w http.ResponseWriter, r *http.Request) {
-	var err error
-	var out []models.Article
+func ListMarketplaceListingForUserById(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	mid := ctx.Value(models.CTX_user_id).(int64)
 
+	data, err := store.ListMarketplaceListingByOwnerId(ctx, mid)
+	if err != nil {
+		ServeError(w, err.Error(), 400)
+		return
+	}
+
+	ServeJSON(w, data)
+}
+
+func SearchMarketplaceListings(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	q := chi.URLParam(r, "q")
-	if q != "" {
-		out, err = store.SearchArticles(ctx, q)
-		if err != nil {
-			ServeError(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	} else {
-		out, err = store.ListArticles(ctx)
-		if err != nil {
-			ServeError(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	}
 
-	ServeJSON(w, out)
-}
-
-func GetArticlesPersonalised(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	//get nft identity cards
-	//get list of names from identity cards
-	//get nft prediction cards
-	//get list of events and names from nft prediction cards
-
-	// q := ""
-
-	out, err := store.ListArticles(ctx)
+	data, err := store.SearchMarketplaceListings(ctx, q)
 	if err != nil {
 		ServeError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	ServeJSON(w, out)
+	ServeJSON(w, data)
 }

@@ -99,3 +99,53 @@ func ListCelebrity(w http.ResponseWriter, r *http.Request) {
 
 	ServeJSON(w, data)
 }
+
+func GetAvailableCelebrityRecipes(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	mid := ctx.Value(models.CTX_user_id).(int64)
+
+	nft_card_day_month, err := store.ListNftCardDayMonthByOwnerId(ctx, mid)
+	if err != nil {
+		ServeError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	nft_card_year, err := store.ListNftCardYearByOwnerId(ctx, mid)
+	if err != nil {
+		ServeError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	nft_card_category, err := store.ListNftCardCategoryByOwnerId(ctx, mid)
+	if err != nil {
+		ServeError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var day_arr []int
+	var month_arr []int
+	var year_arr []int
+	var category_arr []string
+
+	for _, n := range nft_card_day_month {
+		day_arr = append(day_arr, int(*n.Day))
+		month_arr = append(month_arr, int(*n.Month))
+	}
+
+	for _, n := range nft_card_year {
+		year_arr = append(year_arr, int(*n.Year))
+	}
+
+	for _, n := range nft_card_category {
+		category_arr = append(category_arr, *n.Category)
+	}
+
+	celebrities, err := store.ListCelebrityByArrays(ctx, day_arr, month_arr, year_arr, category_arr)
+	if err != nil {
+		ServeError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	ServeJSON(w, celebrities)
+
+}

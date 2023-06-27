@@ -10,17 +10,17 @@ import (
 	"github.com/pandoratoolbox/json"
 )
 
-func GetUser(w http.ResponseWriter, r *http.Request) {
+func GetCategory(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	q := chi.URLParam(r, "user_id")
+	q := chi.URLParam(r, "category_id")
 	id, err := strconv.ParseInt(q, 10, 64)
 	if err != nil {
 		ServeError(w, err.Error(), 500)
 		return
 	}
 
-	data, err := store.GetUser(ctx, id)
+	data, err := store.GetCategory(ctx, id)
 	if err != nil {
 		ServeError(w, err.Error(), 500)
 		return
@@ -29,10 +29,10 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	ServeJSON(w, data)
 }
 
-func NewUser(w http.ResponseWriter, r *http.Request) {
+func NewCategory(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	input := models.User{}
+	input := models.Category{}
 
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&input)
@@ -41,7 +41,7 @@ func NewUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = store.NewUser(ctx, &input)
+	err = store.NewCategory(ctx, &input)
 	if err != nil {
 		ServeError(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -50,46 +50,19 @@ func NewUser(w http.ResponseWriter, r *http.Request) {
 	ServeJSON(w, input)
 }
 
-func UpdateUser(w http.ResponseWriter, r *http.Request) {
+func UpdateCategory(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	mid := ctx.Value(models.CTX_user_id).(int64)
-
-	input := struct {
-		PhoneNumber string `json:"phone_number"`
-		Username    string `json:"username"`
-		Name        string `json:"name"`
-		Password    string `json:"password"`
-	}{}
+	data := models.Category{}
 
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&input)
+	err := decoder.Decode(&data)
 	if err != nil {
 		ServeError(w, err.Error(), 400)
 		return
 	}
 
-	data := models.User{}
-
-	if input.PhoneNumber != "" {
-		data.PhoneNumber = &input.PhoneNumber
-	}
-
-	if input.Name != "" {
-		data.Name = &input.Name
-	}
-
-	if input.Username != "" {
-		data.Username = &input.Username
-	}
-
-	if input.Password != "" {
-		data.Password = &input.Password
-	}
-
-	data.Id = &mid
-
-	err = store.UpdateUser(ctx, data)
+	err = store.UpdateCategory(ctx, data)
 	if err != nil {
 		ServeError(w, err.Error(), 400)
 		return
@@ -98,21 +71,33 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 }
 
-func DeleteUser(w http.ResponseWriter, r *http.Request) {
+func DeleteCategory(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	q := chi.URLParam(r, "user_id")
+	q := chi.URLParam(r, "category_id")
 	id, err := strconv.ParseInt(q, 10, 64)
 	if err != nil {
 		ServeError(w, err.Error(), 500)
 		return
 	}
 
-	err = store.DeleteUser(ctx, id)
+	err = store.DeleteCategory(ctx, id)
 	if err != nil {
 		ServeError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(200)
+}
+
+func ListCategory(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	data, err := store.ListCategory(ctx)
+	if err != nil {
+		ServeError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	ServeJSON(w, data)
 }

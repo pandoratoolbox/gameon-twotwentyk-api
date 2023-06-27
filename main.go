@@ -1,6 +1,8 @@
 package main
 
 import (
+	"gameon-twotwentyk-api/connections"
+	"gameon-twotwentyk-api/graphql"
 	"gameon-twotwentyk-api/handlers"
 	"log"
 	"net/http"
@@ -12,6 +14,7 @@ import (
 )
 
 func main() {
+	var err error
 
 	r := chi.NewRouter()
 
@@ -29,23 +32,25 @@ func main() {
 	r.Use(jwtauth.Verifier(handlers.TokenAuth))
 	r.Use(handlers.Authenticator)
 
-	// r.Route("/user", func(r chi.Router) {
-	// 	r.Group(func(r chi.Router) {
-	// 		r.Use(handlers.RestrictAuth)
-	// 		r.Post("/", handlers.NewUser)
-	// 		r.Route("/{user_id}", func(r chi.Router) {
-	// 			r.Get("/", handlers.GetUser)
-	// 			r.Put("/", handlers.UpdateUser)
-	// 			r.Delete("/", handlers.DeleteUser)
-	// 		})
-	// 	})
-	// })
+	connections.InitPostgres()
+	graphql.Init()
+
+	// GenerateArticles(100)
+	// err = ImportCelebrities()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	r.Route("/trigger", func(r chi.Router) {
+		r.Get("/", handlers.ListTrigger)
+	})
+
+	r.Route("/category", func(r chi.Router) {
+		r.Get("/", handlers.ListCategory)
+	})
 
 	r.Route("/celebrity", func(r chi.Router) {
-		r.Group(func(r chi.Router) {
-			r.Use(handlers.RestrictAdmin)
-			r.Get("/", handlers.ListCelebrity)
-		})
+		r.Get("/", handlers.ListCelebrity)
 		r.Group(func(r chi.Router) {
 			r.Use(handlers.RestrictAuth)
 			r.Post("/", handlers.NewCelebrity)
@@ -100,8 +105,20 @@ func main() {
 
 	r.Route("/me", func(r chi.Router) {
 		r.Use(handlers.RestrictAuth)
+		r.Put("/", handlers.UpdateUser)
 		r.Get("/", handlers.GetMyUserData)
 		r.Get("/claim", handlers.ListClaimForUserById)
+		r.Get("/nft", handlers.GetMyNfts)
+		r.Get("/marketplace_listing", handlers.ListMarketplaceListingForUserById)
+		r.Get("/recipe/identity", handlers.GetAvailableCelebrityRecipes)
+		// r.Get("/recipe/prediction", handlers.GetMyPredictionRecipes)
+		r.Get("/nft_card_identity", handlers.ListNftCardIdentityForUserById)
+		r.Get("/nft_card_prediction", handlers.ListNftCardPredictionForUserById)
+		r.Get("/nft_card_trigger", handlers.ListNftCardTriggerForUserById)
+		r.Get("/nft_card_category", handlers.ListNftCardCategoryForUserById)
+		r.Get("/nft_card_day_month", handlers.ListNftCardDayMonthForUserById)
+		r.Get("/nft_card_year", handlers.ListNftCardYearForUserById)
+		r.Get("/nft_card_crafting", handlers.ListNftCardCraftingForUserById)
 	})
 
 	r.Route("/auth", func(r chi.Router) {
@@ -111,7 +128,6 @@ func main() {
 
 	r.Route("/feed", func(r chi.Router) {
 		r.Get("/", handlers.SearchArticles)
-		// r.Get("/new", handlers.GetArticlesNewest)
 		r.Get("/personalised", handlers.GetArticlesPersonalised)
 	})
 
@@ -121,9 +137,28 @@ func main() {
 	r.Route("/nft", func(r chi.Router) {
 		r.Post("/identity", handlers.CraftIdentity)
 		r.Post("/prediction", handlers.CraftPrediction)
+		r.Post("/trigger", handlers.NewNftCardTrigger)
+		r.Post("/day_month", handlers.NewNftCardDayMonth)
+		r.Post("/crafting", handlers.NewNftCardCrafting)
+		r.Post("/category", handlers.NewNftCardCategory)
+		r.Post("/year", handlers.NewNftCardYear)
+
 	})
 
-	err := http.ListenAndServe(":3333", r)
+	r.Route("/marketplace_listing", func(r chi.Router) {
+		r.Get("/", handlers.SearchMarketplaceListings)
+		r.Group(func(r chi.Router) {
+			r.Use(handlers.RestrictAuth)
+			r.Post("/", handlers.NewMarketplaceListing)
+			r.Route("/marketplace_listing_id}", func(r chi.Router) {
+				r.Get("/", handlers.GetMarketplaceListing)
+				r.Put("/", handlers.UpdateMarketplaceListing)
+				r.Delete("/", handlers.DeleteMarketplaceListing)
+			})
+		})
+	})
+
+	err = http.ListenAndServe(":3333", r)
 	if err != nil {
 		log.Fatalf("Error serving HTTP handlers: %v", err)
 	}

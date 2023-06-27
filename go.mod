@@ -14,6 +14,7 @@ require (
 
 require (
 	cuelang.org/go v0.4.3 // indirect
+	github.com/XANi/loremipsum v1.1.0 // indirect
 	github.com/avast/retry-go v3.0.0+incompatible // indirect
 	github.com/chirino/graphql v0.0.0-20220710191258-f420c1213e22 // indirect
 	github.com/cockroachdb/apd/v2 v2.0.1 // indirect

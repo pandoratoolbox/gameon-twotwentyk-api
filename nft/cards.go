@@ -10,7 +10,7 @@ import (
 // 	return nil
 // }
 
-func CraftIdentity(nft_card_day_id, nft_card_month_id, nft_card_year_id, celebrity_id int64) (models.NftCardIdentity, error) {
+func CraftIdentity(nft_card_day_month_id, nft_card_year_id, celebrity_id int64) (models.NftCardIdentity, error) {
 	var out models.NftCardIdentity
 	return out, nil
 }
@@ -20,13 +20,8 @@ func CraftPrediction(nft_card_prediction_id, nft_card_trigger_id int64) (models.
 	return out, nil
 }
 
-func GetNftCardDay(ctx context.Context, id int64) (models.NftCardDay, error) {
-	var out models.NftCardDay
-	return out, nil
-}
-
-func GetNftCardMonth(ctx context.Context, id int64) (models.NftCardMonth, error) {
-	var out models.NftCardMonth
+func GetNftCardDayMonth(ctx context.Context, id int64) (models.NftCardDayMonth, error) {
+	var out models.NftCardDayMonth
 	return out, nil
 }
 
@@ -42,5 +37,10 @@ func GetNftCardTrigger(ctx context.Context, id int64) (models.NftCardTrigger, er
 
 func GetNftCardIdentity(ctx context.Context, id int64) (models.NftCardIdentity, error) {
 	var out models.NftCardIdentity
+	return out, nil
+}
+
+func GetNftCardCrafting(ctx context.Context, id int64) (models.NftCardCrafting, error) {
+	var out models.NftCardCrafting
 	return out, nil
 }

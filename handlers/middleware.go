@@ -57,9 +57,9 @@ func Authenticator(next http.Handler) http.Handler {
 				ctx = context.WithValue(ctx, models.CTX_is_auth, false)
 			} else {
 				var rids []int64
-				rrids := claimsRole.([]float64)
+				rrids := claimsRole.([]interface{})
 				for _, rrid := range rrids {
-					rids = append(rids, int64(rrid))
+					rids = append(rids, int64(rrid.(float64)))
 				}
 
 				ctx = context.WithValue(ctx, models.CTX_user_role_ids, rids)

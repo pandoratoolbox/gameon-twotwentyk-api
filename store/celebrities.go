@@ -51,3 +51,12 @@ func ListCelebrity(ctx context.Context) ([]models.Celebrity, error) {
 
 	return out, nil
 }
+
+func ListCelebrityByArrays(ctx context.Context, day []int, month []int, year []int, category []string) ([]models.Celebrity, error) {
+	data, err := graphql.ListCelebrityByArrays(ctx, day, month, year, category)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}

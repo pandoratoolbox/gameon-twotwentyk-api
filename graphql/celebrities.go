@@ -192,8 +192,8 @@ func ListCelebrity(ctx context.Context) ([]models.Celebrity, error) {
 	var data []models.Celebrity
 
 	q := fragment_celebrity + `
-			query GetCelebrity {
-			celebrity {
+			query ListCelebrity {
+			celebrity() {
 				...Celebrity
 			}
 		}
@@ -212,6 +212,36 @@ func ListCelebrity(ctx context.Context) ([]models.Celebrity, error) {
 	if err != nil {
 		return data, err
 	}
+
+	data = out.Celebrity
+
+	return data, nil
+}
+
+func ListCelebrityByArrays(ctx context.Context, day []int, month []int, year []int, category []string) ([]models.Celebrity, error) {
+	var data []models.Celebrity
+
+	q := fragment_celebrity + `query ListCelebrityByArrays {
+		celebrity(where: { and: { birth_day: { in: $days }, birth_month: { in: $months }, birth_year: { in: $years }, categories: { in: $categories } }  }) {
+			...Celebrity
+		}
+	}`
+
+	res, err := Graph.GraphQL(ctx, q, nil, nil)
+	if err != nil {
+		return data, err
+	}
+
+	var out struct {
+		Celebrity []models.Celebrity
+	}
+
+	err = json.Unmarshal(res.Data, &out)
+	if err != nil {
+		return data, err
+	}
+
+	data = out.Celebrity
 
 	return data, nil
 }
