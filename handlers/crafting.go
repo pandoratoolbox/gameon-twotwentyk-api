@@ -2,11 +2,13 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"gameon-twotwentyk-api/models"
 	"gameon-twotwentyk-api/store"
 	"net/http"
 	"sort"
-	"time"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 func CraftIdentity(w http.ResponseWriter, r *http.Request) {
@@ -15,58 +17,54 @@ func CraftIdentity(w http.ResponseWriter, r *http.Request) {
 	mid := ctx.Value(models.CTX_user_id).(int64)
 
 	input := struct {
-		NftCardCraftingId int64 `json:"nft_card_crafting_id"`
-		NftCardDayMonthId int64 `json:"nft_card_day_month_id"`
-		NftCardYearId     int64 `json:"nft_card_year_id"`
-		NftCardCategoryId int64 `json:"nft_card_category_id"`
-		CelebrityId       int64 `json:"celebrity_id"`
+		NftCardCraftingId int64  `json:"nft_card_crafting_id"`
+		NftCardDayMonthId int64  `json:"nft_card_day_month_id"`
+		NftCardYearId     int64  `json:"nft_card_year_id"`
+		NftCardCategoryId int64  `json:"nft_card_category_id"`
+		CelebrityId       *int64 `json:"celebrity_id"`
 	}{}
+
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&input)
+	if err != nil {
+		ServeError(w, err.Error(), 500)
+		return
+	}
+
+	spew.Dump(input)
 
 	// var out models.NftCardIdentity
 
 	nft_card_day_month, err := store.GetNftCardDayMonth(ctx, input.NftCardDayMonthId)
 	if err != nil {
-		ServeError(w, err.Error(), http.StatusInternalServerError)
+		ServeError(w, "nft_card_day_month: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	nft_card_year, err := store.GetNftCardYear(ctx, input.NftCardYearId)
 	if err != nil {
-		ServeError(w, err.Error(), http.StatusInternalServerError)
+		ServeError(w, "nft_card_year: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	nft_card_crafting, err := store.GetNftCardCrafting(ctx, input.NftCardCraftingId)
 	if err != nil {
-		ServeError(w, err.Error(), http.StatusInternalServerError)
+		ServeError(w, "nft_card_crafting: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	nft_card_category, err := store.GetNftCardCategory(ctx, input.NftCardCategoryId)
 	if err != nil {
-		ServeError(w, err.Error(), http.StatusInternalServerError)
+		ServeError(w, "nft_card_category: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	//get celebrity by id
-	celebrity, err := store.GetCelebrity(ctx, input.CelebrityId)
-	if err != nil {
-		ServeError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	date_from_nfts := time.Date(int(*nft_card_year.Year), time.Month(*nft_card_day_month.Month), int(*nft_card_day_month.Day), 0, 0, 0, 0, nil)
-
-	celebrity_birthdate := time.Date(int(*celebrity.BirthYear), time.Month(*celebrity.BirthMonth), int(*celebrity.BirthDay), 0, 0, 0, 0, nil)
-
-	if date_from_nfts != celebrity_birthdate {
-		ServeError(w, "NFT date combination and celebrity birthdate doesn't match", 400)
-		return
-	}
-
+	//assign date
 	day := nft_card_day_month.Day
 	month := nft_card_day_month.Month
 	year := nft_card_year.Year
+
+	//check rarities
 	rarities := make(map[int64]int)
 
 	_, ok := rarities[*nft_card_day_month.Rarity]
@@ -108,26 +106,51 @@ func CraftIdentity(w http.ResponseWriter, r *http.Request) {
 		rarity = 0
 	}
 
-	c_name := celebrity.Name
 	category := nft_card_category.Category
 	is_crafted := false
-
+	card_series_id := int64(1)
 	out := models.NftCardIdentity{
 		NftCardIdentityData: models.NftCardIdentityData{
-			OwnerId:       &mid,
-			Year:          year,
-			Month:         month,
-			Day:           day,
-			Rarity:        &rarity,
-			CelebrityName: c_name,
-			Category:      category,
-			IsCrafted:     &is_crafted,
+			OwnerId:      &mid,
+			Year:         year,
+			Month:        month,
+			Day:          day,
+			Rarity:       &rarity,
+			Category:     category,
+			IsCrafted:    &is_crafted,
+			CardSeriesId: &card_series_id,
 		},
+	}
+
+	//get celebrity by id
+	if input.CelebrityId != nil {
+		celebrity, err := store.GetCelebrity(ctx, *input.CelebrityId)
+		if err != nil {
+			ServeError(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if *nft_card_year.Year != *celebrity.BirthYear {
+			ServeError(w, "Nft year doesn't match celebrity", 400)
+			return
+		}
+
+		if *nft_card_day_month.Day != *celebrity.BirthDay {
+			ServeError(w, "Nft day doesn't match celebrity", 400)
+			return
+		}
+
+		if *nft_card_day_month.Month != *celebrity.BirthMonth {
+			ServeError(w, "Nft month doesn't match celebrity", 400)
+			return
+		}
+
+		out.CelebrityName = celebrity.Name
 	}
 
 	err = store.NewNftCardIdentity(context.TODO(), &out)
 	if err != nil {
-		ServeError(w, err.Error(), http.StatusInternalServerError)
+		ServeError(w, "new nft_card_identity: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -173,9 +196,21 @@ func CraftPrediction(w http.ResponseWriter, r *http.Request) {
 		NftCardTriggerIds []int64 `json:"nft_card_trigger_ids"`
 	}{}
 
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&input)
+	if err != nil {
+		ServeError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	nft_card_crafting, err := store.GetNftCardCrafting(ctx, input.NftCardCraftingId)
 	if err != nil {
 		ServeError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if *nft_card_crafting.OwnerId != mid {
+		ServeError(w, "User does not own crafting card", 400)
 		return
 	}
 
@@ -215,6 +250,8 @@ func CraftPrediction(w http.ResponseWriter, r *http.Request) {
 
 	ttriggers := models.Strings(triggers)
 
+	card_series_id := int64(1)
+
 	out = models.NftCardPrediction{
 		NftCardPredictionData: models.NftCardPredictionData{
 			OwnerId:       &mid,
@@ -222,6 +259,7 @@ func CraftPrediction(w http.ResponseWriter, r *http.Request) {
 			Rarity:        &rarity,
 			Triggers:      &ttriggers,
 			CelebrityName: nft_card_identity.CelebrityName,
+			CardSeriesId:  &card_series_id,
 		},
 	}
 
@@ -233,15 +271,31 @@ func CraftPrediction(w http.ResponseWriter, r *http.Request) {
 
 	burn := true
 
-	nft_card_identity.IsCrafted = &burn
-	store.UpdateNftCardIdentity(ctx, nft_card_identity)
+	ni := models.NftCardIdentity{
+		NftCardIdentityData: models.NftCardIdentityData{
+			Id:        &input.NftCardIdentityId,
+			IsCrafted: &burn,
+		},
+	}
 
-	nft_card_crafting.IsCrafted = &burn
-	store.UpdateNftCardCrafting(ctx, nft_card_crafting)
+	store.UpdateNftCardIdentity(ctx, ni)
+
+	nc := models.NftCardCrafting{
+		NftCardCraftingData: models.NftCardCraftingData{
+			Id:        &input.NftCardCraftingId,
+			IsCrafted: &burn,
+		},
+	}
+	store.UpdateNftCardCrafting(ctx, nc)
 
 	for _, t := range nft_card_triggers {
-		t.IsCrafted = &burn
-		store.UpdateNftCardTrigger(ctx, t)
+		n := models.NftCardTrigger{
+			NftCardTriggerData: models.NftCardTriggerData{
+				Id:        t.Id,
+				IsCrafted: &burn,
+			},
+		}
+		store.UpdateNftCardTrigger(ctx, n)
 	}
 
 	ServeJSON(w, out)

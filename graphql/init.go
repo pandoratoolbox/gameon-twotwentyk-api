@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/dosco/graphjin/core"
+	"github.com/dosco/graphjin/core/v3"
 )
 
 var Graph *core.GraphJin
@@ -104,7 +104,8 @@ func ReflectToFragment(data interface{}) string {
 
 func Init() error {
 	var err error
-	Graph, err = core.NewGraphJin(nil, connections.Postgres)
+	conf := core.Config{}
+	Graph, err = core.NewGraphJin(&conf, connections.Postgres)
 
 	if err != nil {
 		return err

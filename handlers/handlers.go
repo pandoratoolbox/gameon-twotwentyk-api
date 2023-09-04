@@ -50,6 +50,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if user.Password == nil {
+		ServeError(w, "Please log in with your social account", http.StatusUnauthorized)
+		return
+	}
+
 	if *user.Password != *input.Password {
 		ServeError(w, errors.New("Wrong password").Error(), 400)
 		return
@@ -111,6 +116,8 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		ServeError(w, err.Error(), 400)
 		return
 	}
+
+	store.AddNftsToUser(ctx, *user.Id)
 
 	_, jwtstring, err := TokenAuth.Encode(map[string]interface{}{
 		"id":       *user.Id,

@@ -104,19 +104,19 @@ func GetAvailableCelebrityRecipes(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	mid := ctx.Value(models.CTX_user_id).(int64)
 
-	nft_card_day_month, err := store.ListNftCardDayMonthByOwnerId(ctx, mid)
+	nft_card_day_month, err := store.ListNftCardDayMonthByOwnerId(ctx, mid, models.NftCardDayMonthFilter{})
 	if err != nil {
 		ServeError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	nft_card_year, err := store.ListNftCardYearByOwnerId(ctx, mid)
+	nft_card_year, err := store.ListNftCardYearByOwnerId(ctx, mid, models.NftCardYearFilter{})
 	if err != nil {
 		ServeError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	nft_card_category, err := store.ListNftCardCategoryByOwnerId(ctx, mid)
+	nft_card_category, err := store.ListNftCardCategoryByOwnerId(ctx, mid, models.NftCardCategoryFilter{})
 	if err != nil {
 		ServeError(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -149,3 +149,17 @@ func GetAvailableCelebrityRecipes(w http.ResponseWriter, r *http.Request) {
 	ServeJSON(w, celebrities)
 
 }
+
+// func GetCelebrityMatch(w http.ResponseWriter, r *http.Request) {
+// 	ctx := r.Context()
+// 	input := struct {
+// 		Category string
+// 		Month    int
+// 		Year     int
+// 		Day      int
+// 	}{}
+
+// 	decoder :=
+
+// 	matches, err := store.GetCelebrityMatch(ctx, category, day, month, year)
+// }

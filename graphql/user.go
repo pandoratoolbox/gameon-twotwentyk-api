@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	fragment_user = ReflectToFragment(models.UserData{})
+	Fragment_user = ReflectToFragment(models.UserData{})
 )
 
 func NewUser(ctx context.Context, data *models.User) error {
@@ -146,7 +146,7 @@ func UpdateUser(ctx context.Context, data models.User) error {
 func GetUser(ctx context.Context, id int64) (models.User, error) {
 	var data models.User
 
-	q := fragment_user + `
+	q := Fragment_user + `
 			query GetUser {
 			user(where: { id: { eq: $id } }) {
 				...User
@@ -191,7 +191,7 @@ func GetUser(ctx context.Context, id int64) (models.User, error) {
 func GetUserByUsername(ctx context.Context, username string) (models.User, error) {
 	var out models.User
 
-	q := fragment_user + `query GetUserByUsername {
+	q := Fragment_user + `query GetUserByUsername {
 		user(where: { username: { eq: $username } }) {
 			...User
 		}
@@ -234,7 +234,7 @@ func GetUserByUsername(ctx context.Context, username string) (models.User, error
 func GetUserByEmail(ctx context.Context, email string) (models.User, error) {
 	var out models.User
 
-	q := fragment_user + `query GetUserByEmail {
+	q := Fragment_user + `query GetUserByEmail {
 		user(where: { email: { eq: $email } }) {
 			...User
 		}

@@ -43,8 +43,8 @@ func UpdateNftCardYear(ctx context.Context, data models.NftCardYear) error {
 	return nil
 }
 
-func ListNftCardYearByOwnerId(ctx context.Context, id int64) ([]models.NftCardYear, error) {
-	data, err := graphql.ListNftCardYearByOwnerId(ctx, id)
+func ListNftCardYearByOwnerId(ctx context.Context, id int64, filters models.NftCardYearFilter) ([]models.NftCardYear, error) {
+	data, err := graphql.ListNftCardYearByOwnerId(ctx, id, filters)
 	if err != nil {
 		return data, err
 	}

@@ -6,6 +6,21 @@ import (
 	"gameon-twotwentyk-api/models"
 )
 
+var CelebrityMap = make(map[int64]models.Celebrity)
+
+func RefreshCelebrityMap(ctx context.Context) error {
+	list, err := ListCelebrity(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, item := range list {
+		CelebrityMap[*item.Id] = item
+	}
+
+	return nil
+}
+
 func NewCelebrity(ctx context.Context, data *models.Celebrity) error {
 	err := graphql.NewCelebrity(ctx, data)
 	if err != nil {

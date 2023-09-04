@@ -3,6 +3,7 @@ package graphql
 import (
 	"context"
 	"errors"
+	"fmt"
 	"gameon-twotwentyk-api/models"
 
 	"github.com/pandoratoolbox/json"
@@ -155,7 +156,7 @@ func GetNftCardDayMonth(ctx context.Context, id int64) (models.NftCardDayMonth, 
 		`
 
 	input := struct {
-		Id int64
+		Id int64 `json:"id"`
 	}{
 		Id: id,
 	}
@@ -188,18 +189,67 @@ func GetNftCardDayMonth(ctx context.Context, id int64) (models.NftCardDayMonth, 
 	return data, nil
 }
 
-func ListNftCardDayMonthByOwnerId(ctx context.Context, id int64) ([]models.NftCardDayMonth, error) {
+func ListNftCardDayMonthByOwnerId(ctx context.Context, id int64, filters models.NftCardDayMonthFilter) ([]models.NftCardDayMonth, error) {
 	var out []models.NftCardDayMonth
 
-	q := fragment_nft_card_day_month + `query ListNftCardDayMonthByOwnerId(where: { owner_id: { eq: $id }}) {
-						...NftCardDayMonth
-					}`
+	q := fragment_nft_card_day_month + `query ListNftCardDayMonthByOwnerId {
+		nft_card_day_month(%s) {
+			...NftCardDayMonth
+		}
+	}`
 
 	input := struct {
-		Id int64 `json:"id"`
+		Id           int64   `json:"id"`
+		Rarities     []int64 `json:"rarities"`
+		Day          int64   `json:"day"`
+		Month        int64   `json:"month"`
+		CardSeriesId int64   `json:"card_series_id"`
 	}{
 		Id: id,
 	}
+
+	filter_params := []string{}
+	q_filters := "where: {%s}"
+
+	filter_params = append(filter_params, "owner_id: { eq: $id }")
+
+	if filters.Day != nil {
+		input.Day = *filters.Day
+		filter_params = append(filter_params, "day: { eq: $day }")
+	}
+
+	if filters.Month != nil {
+		input.Month = *filters.Month
+		filter_params = append(filter_params, "month: { eq: $month }")
+	}
+
+	if filters.CardSeriesId != nil {
+		input.CardSeriesId = *filters.CardSeriesId
+		filter_params = append(filter_params, "card_series_id: { eq: $card_series_id }")
+	}
+
+	if filters.Rarities != nil {
+		input.Rarities = *filters.Rarities
+		filter_params = append(filter_params, "rarity: { in: $rarities }")
+	}
+
+	if len(filter_params) > 1 {
+		q_filters = "where: {and: {%s}}"
+	}
+
+	var q_filter_inner string
+	for i, v := range filter_params {
+		if i == 0 {
+			q_filter_inner = v
+			continue
+		}
+
+		q_filter_inner += ", " + v
+	}
+
+	q_filters = fmt.Sprintf(q_filters, q_filter_inner)
+
+	q = fmt.Sprintf(q, q_filters)
 
 	js, err := json.Marshal(input)
 	if err != nil {
@@ -218,10 +268,6 @@ func ListNftCardDayMonthByOwnerId(ctx context.Context, id int64) ([]models.NftCa
 	err = json.Unmarshal(res.Data, &ret)
 	if err != nil {
 		return out, err
-	}
-
-	if len(ret.NftCardDayMonth) < 1 {
-		return out, errors.New("Object not found")
 	}
 
 	out = ret.NftCardDayMonth

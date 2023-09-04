@@ -60,3 +60,12 @@ func ListClaimByClaimerId(ctx context.Context, id int64) ([]models.Claim, error)
 
 	return data, nil
 }
+
+func ListClaim(ctx context.Context) ([]models.Claim, error) {
+	data, err := graphql.ListClaim(ctx)
+	if err != nil {
+		return data, err
+	}
+
+	return data, nil
+}

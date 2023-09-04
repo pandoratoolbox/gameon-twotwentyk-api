@@ -43,8 +43,8 @@ func UpdateNftCardCategory(ctx context.Context, data models.NftCardCategory) err
 	return nil
 }
 
-func ListNftCardCategoryByOwnerId(ctx context.Context, id int64) ([]models.NftCardCategory, error) {
-	data, err := graphql.ListNftCardCategoryByOwnerId(ctx, id)
+func ListNftCardCategoryByOwnerId(ctx context.Context, id int64, filters models.NftCardCategoryFilter) ([]models.NftCardCategory, error) {
+	data, err := graphql.ListNftCardCategoryByOwnerId(ctx, id, filters)
 	if err != nil {
 		return data, err
 	}

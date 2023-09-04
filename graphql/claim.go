@@ -191,8 +191,10 @@ func GetClaim(ctx context.Context, id int64) (models.Claim, error) {
 func ListClaimByClaimerId(ctx context.Context, id int64) ([]models.Claim, error) {
 	var out []models.Claim
 
-	q := fragment_claim + `query ListClaimByClaimerId(where: { claimer_id: { eq: $id }}) {
+	q := fragment_claim + `query ListClaimByClaimerId {
+		claim(where: { claimer_id: { eq: $id }}) {
 						...Claim
+					}
 					}`
 
 	input := struct {
@@ -232,8 +234,10 @@ func ListClaimByClaimerId(ctx context.Context, id int64) ([]models.Claim, error)
 func ListClaimByArticleId(ctx context.Context, id int64) ([]models.Claim, error) {
 	var out []models.Claim
 
-	q := fragment_claim + `query ListClaimByArticleId(where: { article_id: { eq: $id }}) {
+	q := fragment_claim + `query ListClaimByArticleId {
+		claim(where: { article_id: { eq: $id }}) {
 						...Claim
+					}
 					}`
 
 	input := struct {
@@ -261,8 +265,32 @@ func ListClaimByArticleId(ctx context.Context, id int64) ([]models.Claim, error)
 		return out, err
 	}
 
-	if len(ret.Claim) < 1 {
-		return out, errors.New("Object not found")
+	out = ret.Claim
+
+	return out, nil
+}
+
+func ListClaim(ctx context.Context) ([]models.Claim, error) {
+	var out []models.Claim
+
+	q := fragment_claim + `query ListClaim {
+						claim {
+						...Claim
+						}
+					}`
+
+	res, err := Graph.GraphQL(ctx, q, nil, nil)
+	if err != nil {
+		return out, err
+	}
+
+	ret := struct {
+		Claim []models.Claim
+	}{}
+
+	err = json.Unmarshal(res.Data, &ret)
+	if err != nil {
+		return out, err
 	}
 
 	out = ret.Claim

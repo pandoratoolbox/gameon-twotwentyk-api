@@ -43,8 +43,8 @@ func UpdateNftCardIdentity(ctx context.Context, data models.NftCardIdentity) err
 	return nil
 }
 
-func ListNftCardIdentityByOwnerId(ctx context.Context, id int64) ([]models.NftCardIdentity, error) {
-	data, err := graphql.ListNftCardIdentityByOwnerId(ctx, id)
+func ListNftCardIdentityByOwnerId(ctx context.Context, id int64, filters models.NftCardIdentityFilter) ([]models.NftCardIdentity, error) {
+	data, err := graphql.ListNftCardIdentityByOwnerId(ctx, id, filters)
 	if err != nil {
 		return data, err
 	}

@@ -43,8 +43,8 @@ func UpdateNftCardDayMonth(ctx context.Context, data models.NftCardDayMonth) err
 	return nil
 }
 
-func ListNftCardDayMonthByOwnerId(ctx context.Context, id int64) ([]models.NftCardDayMonth, error) {
-	data, err := graphql.ListNftCardDayMonthByOwnerId(ctx, id)
+func ListNftCardDayMonthByOwnerId(ctx context.Context, id int64, filters models.NftCardDayMonthFilter) ([]models.NftCardDayMonth, error) {
+	data, err := graphql.ListNftCardDayMonthByOwnerId(ctx, id, filters)
 	if err != nil {
 		return data, err
 	}

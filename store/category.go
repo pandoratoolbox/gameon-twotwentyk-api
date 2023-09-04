@@ -6,6 +6,21 @@ import (
 	"gameon-twotwentyk-api/models"
 )
 
+var CategoryMap = make(map[int64]models.Category)
+
+func RefreshCategoryMap(ctx context.Context) error {
+	list, err := ListCategory(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, item := range list {
+		CategoryMap[*item.Id] = item
+	}
+
+	return nil
+}
+
 func NewCategory(ctx context.Context, data *models.Category) error {
 	err := graphql.NewCategory(ctx, data)
 	if err != nil {

@@ -43,8 +43,8 @@ func UpdateNftCardCrafting(ctx context.Context, data models.NftCardCrafting) err
 	return nil
 }
 
-func ListNftCardCraftingByOwnerId(ctx context.Context, id int64) ([]models.NftCardCrafting, error) {
-	data, err := graphql.ListNftCardCraftingByOwnerId(ctx, id)
+func ListNftCardCraftingByOwnerId(ctx context.Context, id int64, filters models.NftCardCraftingFilter) ([]models.NftCardCrafting, error) {
+	data, err := graphql.ListNftCardCraftingByOwnerId(ctx, id, filters)
 	if err != nil {
 		return data, err
 	}

@@ -162,3 +162,15 @@ func ListClaimForUserById(w http.ResponseWriter, r *http.Request) {
 
 	ServeJSON(w, data)
 }
+
+func ListClaim(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	data, err := store.ListClaim(ctx)
+	if err != nil {
+		ServeError(w, err.Error(), 400)
+		return
+	}
+
+	ServeJSON(w, data)
+}

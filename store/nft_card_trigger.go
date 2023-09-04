@@ -43,8 +43,8 @@ func UpdateNftCardTrigger(ctx context.Context, data models.NftCardTrigger) error
 	return nil
 }
 
-func ListNftCardTriggerByOwnerId(ctx context.Context, id int64) ([]models.NftCardTrigger, error) {
-	data, err := graphql.ListNftCardTriggerByOwnerId(ctx, id)
+func ListNftCardTriggerByOwnerId(ctx context.Context, id int64, filters models.NftCardTriggerFilter) ([]models.NftCardTrigger, error) {
+	data, err := graphql.ListNftCardTriggerByOwnerId(ctx, id, filters)
 	if err != nil {
 		return data, err
 	}

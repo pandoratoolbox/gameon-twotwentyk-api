@@ -3,13 +3,14 @@ package graphql
 import (
 	"context"
 	"errors"
+	"fmt"
 	"gameon-twotwentyk-api/models"
 
 	"github.com/pandoratoolbox/json"
 )
 
 var (
-	fragment_marketplace_listing = ReflectToFragment(models.MarketplaceListingData{})
+	Fragment_marketplace_listing = ReflectToFragment(models.MarketplaceListingData{})
 )
 
 func NewMarketplaceListing(ctx context.Context, data *models.MarketplaceListing) error {
@@ -60,7 +61,7 @@ func NewMarketplaceListing(ctx context.Context, data *models.MarketplaceListing)
 func DeleteMarketplaceListing(ctx context.Context, id int64) error {
 	q := `
 		mutation DeleteMarketplaceListing {
-			marketplace_listing(where: { id: { eq: $id } }) {
+			marketplace_listing(delete: true, where: { id: { eq: $id } }) {
 				id
 			}
 		}
@@ -146,7 +147,7 @@ func UpdateMarketplaceListing(ctx context.Context, data models.MarketplaceListin
 func GetMarketplaceListing(ctx context.Context, id int64) (models.MarketplaceListing, error) {
 	var data models.MarketplaceListing
 
-	q := fragment_marketplace_listing + `
+	q := Fragment_marketplace_listing + `
 			query GetMarketplaceListing {
 			marketplace_listing(where: { id: { eq: $id } }) {
 				...MarketplaceListing
@@ -191,7 +192,7 @@ func GetMarketplaceListing(ctx context.Context, id int64) (models.MarketplaceLis
 func ListMarketplaceListingByOwnerId(ctx context.Context, id int64) ([]models.MarketplaceListing, error) {
 	var out []models.MarketplaceListing
 
-	q := fragment_marketplace_listing + `query ListMarketplaceListingByOwnerId {
+	q := Fragment_marketplace_listing + `query ListMarketplaceListingByOwnerId {
 		marketplace_listing(where: { owner_id: { eq: $id }}) {
 						...MarketplaceListing
 		}
@@ -231,35 +232,120 @@ func ListMarketplaceListingByOwnerId(ctx context.Context, id int64) ([]models.Ma
 	return out, nil
 }
 
-func SearchMarketplaceListings(ctx context.Context, q string) ([]models.MarketplaceListing, error) {
+func SearchMarketplaceListings(ctx context.Context, q string, card_collection_id int64, nft_type_ids []int64, limit int, listing_id int64, with_owner bool) ([]models.MarketplaceListing, error) {
 	var out []models.MarketplaceListing
+	var q_nft string
+	card_collection_q := "or: {nft_card_crafting: {card_series: { card_collection_id: $cid }}, card_pack: {card_series: { card_collection_id: $cid }}, nft_card_day_month: {card_series: { card_collection_id: $cid }}, nft_card_year: {card_series: { card_collection_id: $cid }}, nft_card_category: {card_series: { card_collection_id: $cid }}, nft_card_identity: {card_series: { card_collection_id: $cid }}, nft_card_prediction: {card_series: { card_collection_id: $cid }}, nft_card_trigger: {card_series: { card_collection_id: $cid }}}"
+	filters := fmt.Sprintf("where: { and: { nft_type_id: {in: $nids}, is_listed: true, %s }}", card_collection_q)
 
-	gq := fragment_marketplace_listing + `query SearchMarketplaceListings {
-		marketplace_listing() {
+	fragments := Fragment_marketplace_listing
+
+	for _, v := range nft_type_ids {
+		switch v {
+		case models.NFT_TYPE_ID_CATEGORY:
+			fragments += `
+		
+		` + fragment_nft_card_category
+			q_nft += `
+			nft_card_category {
+			...NftCardCategory
+		}`
+		case models.NFT_TYPE_ID_CRAFTING:
+			fragments += `
+		
+		` + fragment_nft_card_crafting
+			q_nft += `
+			nft_card_crafting {
+			...NftCardCrafting
+		}`
+		case models.NFT_TYPE_ID_PREDICTION:
+			fragments += `
+		` + fragment_nft_card_prediction
+			q_nft += `
+			nft_card_prediction
+		{
+			...NftCardPrediction
+		}`
+		case models.NFT_TYPE_ID_IDENTITY:
+			fragments += `
+		
+		` + fragment_nft_card_identity
+			q_nft += `
+			nft_card_identity
+		{
+			...NftCardIdentity
+		}`
+		case models.NFT_TYPE_ID_DAY_MONTH:
+			fragments += `
+		
+		` + fragment_nft_card_day_month
+			q_nft += `
+			nft_card_day_month
+		{
+			...NftCardDayMonth
+		}`
+		case models.NFT_TYPE_ID_TRIGGER:
+			fragments += `
+		
+		` + fragment_nft_card_trigger
+			q_nft += `
+			nft_card_trigger
+		{
+			...NftCardTrigger
+		}`
+		case models.NFT_TYPE_ID_YEAR:
+			fragments += `
+		
+		` + fragment_nft_card_year
+			q_nft += `
+			nft_card_year
+		{
+			...NftCardYear
+		}`
+		}
+	}
+
+	input := struct {
+		Limit int
+		Nids  []int64
+		Id    int64
+		Cid   int64
+	}{
+		Limit: limit,
+		Nids:  nft_type_ids,
+		Cid:   card_collection_id,
+	}
+
+	if listing_id != 0 {
+		filters = fmt.Sprintf("where: { and: { nft_type_id: {in: $nids}, nft_card_category_id: $id, %s }}", card_collection_q)
+		input.Id = 14
+	}
+
+	if with_owner {
+		fragments += `
+		
+		` + Fragment_user
+		q_nft = `owner
+		{
+			...User
+		}`
+	}
+
+	js, err := json.Marshal(input)
+	if err != nil {
+		return out, err
+	}
+
+	gq := fragments + fmt.Sprintf(`query SearchMarketplaceListings {
+		marketplace_listing(%s, limit: $limit) {
 						...MarketplaceListing
+						%s
 					}
-				}`
+				}`, filters, q_nft)
 
-	// 	gq := fragment_article + `
-	// 	query ListArticles {
-	// 	article() {
-	// 		...Article
-	// 	}
-	// }
-	// `
+	// fmt.Println(gq)
 
-	// input := struct {
-	// 	Q string `json:"q"`
-	// }{
-	// 	Q: q,
-	// }
-
-	// js, err := json.Marshal(input)
-	// if err != nil {
-	// 	return out, err
-	// }
-
-	res, err := Graph.GraphQL(ctx, gq, nil, nil)
+	res, err := Graph.GraphQL(ctx, gq, js, nil)
 	if err != nil {
 		return out, err
 	}
@@ -268,16 +354,26 @@ func SearchMarketplaceListings(ctx context.Context, q string) ([]models.Marketpl
 		MarketplaceListing []models.MarketplaceListing
 	}{}
 
+	// js, err = res.Data.MarshalJSON()
+	// if err != nil {
+	// 	return out, err
+	// }
+
+	// spew.Dump(js)
+
 	err = json.Unmarshal(res.Data, &ret)
 	if err != nil {
 		return out, err
 	}
 
-	// if len(ret.MarketplaceListing) < 1 {
-	// 	return out, errors.New("Object not found")
-	// }
-
 	out = ret.MarketplaceListing
 
 	return out, nil
 }
+
+// func GetMarketplaceListingByNftIdAndCollectionIdWithOwner(ctx context.Context, nft_collection_id int64, nft_id int64) (models.MarketplaceListing, error) {
+
+// 	q := ``
+
+// 	return out, nil
+// }
