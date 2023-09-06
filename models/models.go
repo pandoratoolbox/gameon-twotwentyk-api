@@ -285,6 +285,7 @@ type CardCollection struct {
 }
 
 type UserData struct {
+	VenlyId        *string
 	CreatedAt      *time.Time
 	Password       *string
 	Id             *int64

@@ -6,6 +6,7 @@ import (
 	"gameon-twotwentyk-api/graphql"
 	"gameon-twotwentyk-api/handlers"
 	"gameon-twotwentyk-api/store"
+	"gameon-twotwentyk-api/venly"
 	"log"
 	"net/http"
 
@@ -41,6 +42,16 @@ func main() {
 	store.RefreshCelebrityMap(context.Background())
 	store.RefreshTriggerMap(context.Background())
 	// store.RefreshNftCollectionMap(context.Background())
+
+	c, err := venly.NewClient(venly.VenlyClientConfig{
+		ClientId:     venly.VENLY_CLIENT_ID,
+		ClientSecret: venly.VENLY_APP_SECRET,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	venly.Global = c
 
 	r.Get("/nft_card_day_month/{nft_card_day_month_id}", handlers.GetNftCardDayMonth)
 

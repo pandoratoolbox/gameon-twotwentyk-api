@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"context"
 	"gameon-twotwentyk-api/models"
 	"gameon-twotwentyk-api/store"
+	"gameon-twotwentyk-api/venly"
 	"net/http"
 
 	"github.com/Timothylock/go-signin-with-apple/apple"
@@ -49,8 +51,6 @@ func AuthApple(w http.ResponseWriter, r *http.Request) {
 
 	user, err := store.GetUserByEmail(ctx, email)
 	if err != nil {
-		// ServeError(w, err.Error(), http.StatusInternalServerError)
-		// return
 		roles := models.Ints{1}
 
 		user := models.User{
@@ -60,13 +60,11 @@ func AuthApple(w http.ResponseWriter, r *http.Request) {
 			},
 		}
 
-		err = store.NewUser(ctx, &user)
+		err = registerNewUser(ctx, user)
 		if err != nil {
-			ServeError(w, err.Error(), 400)
+			ServeError(w, err.Error(), 500)
 			return
 		}
-
-		store.AddNftsToUser(ctx, *user.Id)
 
 		_, jwtstring, err := TokenAuth.Encode(map[string]interface{}{
 			"id":       *user.Id,
@@ -74,7 +72,7 @@ func AuthApple(w http.ResponseWriter, r *http.Request) {
 		})
 
 		if err != nil {
-			ServeError(w, err.Error(), 400)
+			ServeError(w, err.Error(), 500)
 			return
 		}
 
@@ -142,8 +140,6 @@ func AuthGoogle(w http.ResponseWriter, r *http.Request) {
 
 	user, err := store.GetUserByEmail(ctx, email)
 	if err != nil {
-		// ServeError(w, err.Error(), http.StatusInternalServerError)
-		// return
 		roles := models.Ints{1}
 
 		user := models.User{
@@ -153,13 +149,11 @@ func AuthGoogle(w http.ResponseWriter, r *http.Request) {
 			},
 		}
 
-		err = store.NewUser(ctx, &user)
+		err = registerNewUser(ctx, user)
 		if err != nil {
 			ServeError(w, err.Error(), 400)
 			return
 		}
-
-		store.AddNftsToUser(ctx, *user.Id)
 
 		_, jwtstring, err := TokenAuth.Encode(map[string]interface{}{
 			"id":       *user.Id,
@@ -199,4 +193,42 @@ func AuthGoogle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ServeJSON(w, out)
+}
+
+func registerNewUser(ctx context.Context, user models.User) error {
+	err := store.NewUser(ctx, &user)
+	if err != nil {
+		return err
+	}
+
+	wallet, err := venly.Global.CreateWallet(venly.VenlyRequestCreateWallet{
+		Description: "test",
+		PinCode:     "1234",
+		SecretType:  "MATIC",
+		WalletType:  "WHITE_LABEL",
+		Identifier:  "type=unrecoverable",
+	})
+	if err != nil {
+		return err
+	}
+
+	upd := models.User{
+		UserData: models.UserData{
+			Id:            user.Id,
+			WalletAddress: &wallet.Address,
+			VenlyId:       &wallet.ID,
+		},
+	}
+
+	err = store.UpdateUser(ctx, upd)
+	if err != nil {
+		return err
+	}
+
+	err = store.AddNftsToUser(ctx, *user.Id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

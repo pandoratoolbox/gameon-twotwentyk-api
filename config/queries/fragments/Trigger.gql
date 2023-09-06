@@ -1,0 +1,5 @@
+fragment Trigger on trigger {
+		name
+		tier
+		id
+	}

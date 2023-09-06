@@ -111,13 +111,11 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	err = store.NewUser(ctx, &user)
+	err = registerNewUser(ctx, user)
 	if err != nil {
-		ServeError(w, err.Error(), 400)
+		ServeError(w, err.Error(), 500)
 		return
 	}
-
-	store.AddNftsToUser(ctx, *user.Id)
 
 	_, jwtstring, err := TokenAuth.Encode(map[string]interface{}{
 		"id":       *user.Id,
