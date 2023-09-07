@@ -229,7 +229,8 @@ func main() {
 		r.Route("/moonpay", func(r chi.Router) {
 			r.Route("/nft", func(r chi.Router) {
 				r.Get("/asset_info/{contract_address}/{token_id}", handlers.WebhookMoonpayGetNftInfo)
-
+				r.Post("/deliver_nft/{contractAddress}/{tokenId}", handlers.WebhookMoonpayDeliverNFT)
+				r.Post("/transaction_status", handlers.WebhookMoonpayTransactionStatus)
 			})
 
 			r.Route("/transaction", func(r chi.Router) {
