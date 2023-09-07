@@ -1,0 +1,14 @@
+fragment User on user {
+		venly_id
+		created_at
+		password
+		id
+		email
+		external_auth_id
+		wallet_address
+		phone_number
+		name
+		username
+		role_ids
+		balance
+	}

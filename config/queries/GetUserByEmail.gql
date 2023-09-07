@@ -1,0 +1,7 @@
+#import "./fragments/User"
+
+query GetUserByEmail {
+		user(where: { email: { eq: $email } }) {
+			...User
+		}
+	}

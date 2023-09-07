@@ -1,0 +1,5 @@
+mutation CreateUser {
+			user(insert: $data) {
+				id
+			}
+		}
