@@ -7,6 +7,7 @@ import (
 	"gameon-twotwentyk-api/handlers"
 	"gameon-twotwentyk-api/store"
 	"gameon-twotwentyk-api/venly"
+	"gameon-twotwentyk-api/ws"
 	"log"
 	"net/http"
 
@@ -238,6 +239,8 @@ func main() {
 			})
 		})
 	})
+
+	r.Get("/ws", ws.WSConnection)
 
 	err = http.ListenAndServe(":3333", r)
 	if err != nil {
