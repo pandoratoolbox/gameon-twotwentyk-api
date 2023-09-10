@@ -180,7 +180,7 @@ func WebhookMoonpayDeliverNFT(w http.ResponseWriter, r *http.Request) {
 
 func WebhookMoonpayTransactionStatus(w http.ResponseWriter, r *http.Request) {
 	tx_ids := strings.Split(r.URL.Query().Get("id"), ",")
-	url := "https://deep-index.moralis.io/api/v2.2/transaction/%s?chain=polygon"
+	url := "GET : https://api-wallet.venly.io/api/transactions/MATIC/%s/status"
 
 	type localResponse struct {
 		Id              string    `json:"id"`
