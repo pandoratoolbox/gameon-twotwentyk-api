@@ -1,10 +1,13 @@
 package handlers
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"gameon-twotwentyk-api/graphql"
+	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -24,127 +27,7 @@ func WebhookMoonpayGetNftInfo(w http.ResponseWriter, r *http.Request) {
 
 	token_id_q := chi.URLParam(r, "token_id")
 
-	//0 doesn't pass through json encoding - fix in custom encoderS
-	// token_id := int64(14)
-
-	// if !strings.Contains(token_id_q, "_") {
-	// 	var err error
-	// 	token_id, err = strconv.ParseInt(token_id_q, 10, 64)
-	// 	if err != nil {
-	// 		ServeError(w, err.Error(), http.StatusBadRequest)
-	// 		return
-	// 	}
-
-	// }
-
-	// listing_id_q := r.URL.Query().Get("listingId")
-	// buyer_wallet_address := r.URL.Query().Get("walletAddress")
-
-	// nft_collection, ok := store.GetNftCollectionByContractAddress(ctx, contract_address)
-	// if !ok {
-	// 	ServeError(w, fmt.Sprintf("Unable to find nft collection for contract address (%s)", contract_address), http.StatusBadRequest)
-	// 	return
-	// }
-
-	// nft_collection := struct {
-	// 	Id   int64
-	// 	Name string
-	// }{
-	// 	Id:   models.NFT_TYPE_ID_CATEGORY,
-	// 	Name: "category",
-	// }
-
-	// out := struct {
-	// 	TokenId           string `json:"tokenId"`
-	// 	ContractAddress   string `json:"contractAddress"`
-	// 	Name              string `json:"name"`
-	// 	Collection        string `json:"collection"`
-	// 	ImageUrl          string `json:"imageUrl"`
-	// 	ExplorerUrl       string `json:"explorerUrl"`
-	// 	Price             string `json:"price"`
-	// 	PriceCurrencyCode string `json:"priceCurrencyCode"`
-	// 	Quantity          int64  `json:"quantity"`
-	// 	SellerAddress     string `json:"sellerAddress"`
-	// 	SellType          string `json:"sellType"`
-	// 	Flow              string `json:"flow"`
-	// 	Network           string `json:"network"`
-	// }{
-	// 	TokenId:           token_id_q,
-	// 	ContractAddress:   contract_address,
-	// 	PriceCurrencyCode: "USD",
-	// 	SellType:          "Secondary",
-	// 	Flow:              "Lite",
-	// 	Network:           "polygon",
-	// 	Quantity:          1,
-	// }
-
-	// switch nft_collection.Id {
-	// case models.NFT_TYPE_ID_CATEGORY:
-	// 	listings, err := store.SearchMarketplaceListings(ctx, "", 1, []int64{nft_collection.Id}, 1, token_id, true)
-	// 	if err != nil {
-	// 		ServeError(w, err.Error(), http.StatusBadRequest)
-	// 		return
-	// 	}
-
-	// 	listing := listings[0]
-
-	// 	nft, err := store.GetNftCardCategory(ctx, token_id)
-	// 	if err != nil {
-	// 		ServeError(w, err.Error(), http.StatusBadRequest)
-	// 		return
-	// 	}
-
-	// 	rarity, ok := store.NftRarityMap[*nft.Rarity]
-	// 	if !ok {
-	// 		ServeError(w, fmt.Sprintf("Error getting rarity from map with id (%d)", rarity), http.StatusBadRequest)
-	// 		return
-	// 	}
-
-	// 	out.Name = fmt.Sprintf("%s %s Category Card", *nft.Category, rarity)
-	// 	out.Collection = nft_collection.Name
-	// 	out.SellerAddress = *listing.Owner.WalletAddress
-	// 	out.Price = strconv.FormatInt(*listing.Price, 10)
-	// 	break
-	// case models.NFT_TYPE_ID_CRAFTING:
-	// case models.NFT_TYPE_ID_DAY_MONTH:
-	// case models.NFT_TYPE_ID_IDENTITY:
-	// case models.NFT_TYPE_ID_PREDICTION:
-	// case models.NFT_TYPE_ID_TRIGGER:
-	// case models.NFT_TYPE_ID_YEAR:
-	// default:
-	// 	ServeError(w, "NFT collection for given id is not currently supported.", http.StatusServiceUnavailable)
-	// 	return
-	// }
-
 	body := getNFTMetadata(contract_address, token_id_q)
-
-	// ServeJSON(w, out)
-
-	// js, err := json.Marshal(out)
-	// if err != nil {
-	// 	ServeError(w, err.Error(), 500)
-	// 	return
-	// }
-
-	// w.Write(js)
-
-	// fmt.Println(string(js))
-
-	// w.Write([]byte(`{
-	// 	"tokenId":"109",
-	// 	"contractAddress":"0x2180c6ecf2f770bd51dbb0d779cc81048899",
-	// 	"name":"MoonRocket",
-	// 	"collection":"MoonPay Special Collection",
-	// 	"imageUrl":"https://b1ic5m3wqxz9zd.cloudfront.net/f793.jpg",
-	// 	"explorerUrl":"",
-	// 	"price":0.1,
-	// 	"priceCurrencyCode":"ETH",
-	// 	"quantity":1,
-	// 	"sellerAddress":"0xt246e19c76a23068fa235e1673c10opecfbeb7hf",
-	// 	"sellType":"Primary",
-	// 	"flow":"Lite",
-	// 	"network":"Ethereum"
-	//  }`))
 
 	w.Write(body)
 
@@ -162,7 +45,7 @@ func getNFTMetadata(contract_address string, token_id_q string) []byte {
 	res, _ := http.DefaultClient.Do(req)
 
 	defer res.Body.Close()
-	body, _ := ioutil.ReadAll(res.Body)
+	body, _ := io.ReadAll(res.Body)
 	return body
 }
 
@@ -189,7 +72,7 @@ func WebhookMoonpayDeliverNFT(w http.ResponseWriter, r *http.Request) {
 		ListingId           string
 	}{}
 
-	data, err := ioutil.ReadAll(r.Body)
+	data, err := io.ReadAll(r.Body)
 	if err != nil {
 		ServeError(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -198,6 +81,13 @@ func WebhookMoonpayDeliverNFT(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	err = json.Unmarshal(data, &body)
+	if err != nil {
+		ServeError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// get user by wallet address
+	user, err := graphql.GetUserByWalletAddress(r.Context(), body.SellerWalletAddress)
 	if err != nil {
 		ServeError(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -223,11 +113,68 @@ func WebhookMoonpayDeliverNFT(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: Check if for sale
 	// TODO: if not for sale retrurn 403 error
-
 	// TODO: Return transactionId after transfering the nft to seller
-	w.Write([]byte(`{
+	url := "https://api-wallet.venly.io/api/transactions/execute"
+	transferNftBodyStr := `{
+  "transactionRequest" : {
+    "type" : "NFT_TRANSFER",
+    "walletId" : "%s", 
+    "to" : "%s",
+    "secretType" : "MATIC",
+    "tokenAddress" : "%s",
+    "tokenId" : %d
+  }
+  "pincode" : "1234"
+}`
+	token_id, err := strconv.ParseInt(nftMetadata.TokenID, 10, 64)
+	if err != nil {
+		ServeError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	transferNftBodyStr = fmt.Sprintf(transferNftBodyStr, user.VenlyId, body.BuyerWalletAddress, nftMetadata.TokenAddress, token_id)
+	transferNftBody := []byte(transferNftBodyStr)
+	// walletId = user.venly_id
+	// to = body.BuyerWalletAddress
+	// tokenAddress = nftMetadata.TokenAddress
+
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(transferNftBody))
+	if err != nil {
+		ServeError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		ServeError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	defer res.Body.Close()
+	resBody, err := io.ReadAll(res.Body)
+	if err != nil {
+		ServeError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	resBodyStruct := struct {
+		Success bool `json:"success"`
+		Result  struct {
+			TransactionHash string `json:"transactionHash"`
+		} `json:"result"`
+	}{}
+
+	err = json.Unmarshal(resBody, &resBodyStruct)
+	if err != nil {
+		ServeError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	finalRes := `{
 		transactionId:%s
-	}`))
+	}`
+	finalRes = fmt.Sprintf(finalRes, resBodyStruct.Result.TransactionHash)
+	w.Write([]byte(finalRes))
 
 }
 
@@ -253,13 +200,21 @@ func WebhookMoonpayTransactionStatus(w http.ResponseWriter, r *http.Request) {
 		req.Header.Add("Accept", "application/json")
 		req.Header.Add("X-API-Key", "YOUR_API_KEY")
 
-		res, _ := http.DefaultClient.Do(req)
+		res, err := http.DefaultClient.Do(req)
+		if err != nil {
+			ServeError(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 		defer res.Body.Close()
-		body, _ := ioutil.ReadAll(res.Body)
+		body, err := io.ReadAll(res.Body)
+		if err != nil {
+			ServeError(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 		resp := localResponse{}
-		err := json.Unmarshal(body, &resp)
+		err = json.Unmarshal(body, &resp)
 		if err != nil {
 			ServeError(w, err.Error(), http.StatusInternalServerError)
 			return

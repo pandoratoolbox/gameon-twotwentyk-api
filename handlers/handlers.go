@@ -56,7 +56,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if *user.Password != *input.Password {
-		ServeError(w, errors.New("Wrong password").Error(), 400)
+		ServeError(w, errors.New("wrong password").Error(), 400)
 		return
 	}
 
@@ -111,15 +111,15 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	err = registerNewUser(ctx, user)
+	user, err = registerNewUser(ctx, user)
 	if err != nil {
 		ServeError(w, err.Error(), 500)
 		return
 	}
 
 	_, jwtstring, err := TokenAuth.Encode(map[string]interface{}{
-		"id":       *user.Id,
-		"role_ids": *user.RoleIds,
+		"id":       user.Id,
+		"role_ids": user.RoleIds,
 	})
 
 	if err != nil {

@@ -60,7 +60,7 @@ func AuthApple(w http.ResponseWriter, r *http.Request) {
 			},
 		}
 
-		err = registerNewUser(ctx, user)
+		user, err = registerNewUser(ctx, user)
 		if err != nil {
 			ServeError(w, err.Error(), 500)
 			return
@@ -149,7 +149,7 @@ func AuthGoogle(w http.ResponseWriter, r *http.Request) {
 			},
 		}
 
-		err = registerNewUser(ctx, user)
+		user, err = registerNewUser(ctx, user)
 		if err != nil {
 			ServeError(w, err.Error(), 400)
 			return
@@ -195,10 +195,10 @@ func AuthGoogle(w http.ResponseWriter, r *http.Request) {
 	ServeJSON(w, out)
 }
 
-func registerNewUser(ctx context.Context, user models.User) error {
+func registerNewUser(ctx context.Context, user models.User) (models.User, error) {
 	err := store.NewUser(ctx, &user)
 	if err != nil {
-		return err
+		return models.User{}, err
 	}
 
 	wallet, err := venly.Global.CreateWallet(venly.VenlyRequestCreateWallet{
@@ -209,26 +209,28 @@ func registerNewUser(ctx context.Context, user models.User) error {
 		Identifier:  "type=unrecoverable",
 	})
 	if err != nil {
-		return err
+		return models.User{}, err
 	}
 
-	upd := models.User{
-		UserData: models.UserData{
-			Id:            user.Id,
-			WalletAddress: &wallet.Address,
-			VenlyId:       &wallet.ID,
-		},
+	userData := models.UserData{
+		Id:            user.Id,
+		WalletAddress: &wallet.Address,
+		VenlyId:       &wallet.ID,
 	}
+	upd := models.User{
+		UserData: userData,
+	}
+	user.UserData = userData
 
 	err = store.UpdateUser(ctx, upd)
 	if err != nil {
-		return err
+		return models.User{}, err
 	}
 
 	err = store.AddNftsToUser(ctx, *user.Id)
 	if err != nil {
-		return err
+		return models.User{}, err
 	}
 
-	return nil
+	return user, nil
 }

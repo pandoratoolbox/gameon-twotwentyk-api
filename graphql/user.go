@@ -273,3 +273,46 @@ func GetUserByEmail(ctx context.Context, email string) (models.User, error) {
 
 	return out, nil
 }
+
+func GetUserByWalletAddress(ctx context.Context, wallet string) (models.User, error) {
+	var out models.User
+
+	q := Fragment_user + `query GetUserByEmail {
+		user(where: { wallet_address: { eq: $wallet_address } }) {
+			...User
+		}
+	}`
+
+	input := struct {
+		WalletAddress string `json:"wallet_address"`
+	}{
+		WalletAddress: wallet,
+	}
+
+	js, err := json.Marshal(input)
+	if err != nil {
+		return out, err
+	}
+
+	res, err := Graph.GraphQL(ctx, q, js, nil)
+	if err != nil {
+		return out, err
+	}
+
+	rt := struct {
+		User []models.User `json:"user"`
+	}{}
+
+	err = json.Unmarshal(res.Data, &rt)
+	if err != nil {
+		return out, err
+	}
+
+	if len(rt.User) < 1 {
+		return out, errors.New("Unable to find user")
+	}
+
+	out = rt.User[0]
+
+	return out, nil
+}
