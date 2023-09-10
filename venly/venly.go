@@ -4,8 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 )
 
@@ -20,7 +23,7 @@ var Global *VenlyClient
 
 type VenlyRequestCreateWallet struct {
 	Description string `json:"description,omitempty"`
-	PinCode     string `json:"pinCode,omitempty"`
+	PinCode     string `json:"pincode,omitempty"`
 	SecretType  string `json:"secretType,omitempty"`
 	WalletType  string `json:"walletType,omitempty"`
 	Identifier  string `json:"identifier,omitempty"`
@@ -56,9 +59,9 @@ type VenlyResponseCreateWallet struct {
 }
 
 type VenlyRequestGetAccessToken struct {
-	ClientId     string
-	ClientSecret string
-	GrantType    string
+	ClientId     string `json:"client_id"`
+	ClientSecret string `json:"client_secret"`
+	GrantType    string `json:"grant_type"`
 }
 
 type VenlyResponseGetAccessToken struct {
@@ -113,9 +116,23 @@ func (c *VenlyClient) SendRequest(t string, url string, data interface{}) ([]byt
 				return nil, err
 			}
 
-			b, err := ioutil.ReadAll(r.Body)
+			r.Header.Add("Content-Type", "application/json")
+			r.Header.Add("Authorization", "Bearer "+c.AccessToken)
+
+			res, err := c.Http.Do(r)
 			if err != nil {
 				return nil, err
+			}
+
+			b, err := ioutil.ReadAll(res.Body)
+			if err != nil {
+				return nil, err
+			}
+
+			fmt.Println("Venly send request response: ", string(b))
+
+			if res.StatusCode != 200 {
+				return nil, errors.New(fmt.Sprintf("Failed POST request to Venly %s: %s", url, res.Status))
 			}
 
 			return b, nil
@@ -126,9 +143,21 @@ func (c *VenlyClient) SendRequest(t string, url string, data interface{}) ([]byt
 			return nil, err
 		}
 
-		b, err := ioutil.ReadAll(r.Body)
+		r.Header.Add("Content-Type", "application/json")
+		r.Header.Add("Authorization", "Bearer "+c.AccessToken)
+
+		res, err := c.Http.Do(r)
 		if err != nil {
 			return nil, err
+		}
+
+		b, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		if res.StatusCode != 200 {
+			return nil, errors.New(fmt.Sprintf("Failed POST request to Venly %s: %s", url, res.Status))
 		}
 
 		return b, nil
@@ -140,9 +169,21 @@ func (c *VenlyClient) SendRequest(t string, url string, data interface{}) ([]byt
 			return nil, err
 		}
 
-		b, err := ioutil.ReadAll(r.Body)
+		r.Header.Add("Content-Type", "application/json")
+		r.Header.Add("Authorization", "Bearer "+c.AccessToken)
+
+		res, err := c.Http.Do(r)
 		if err != nil {
 			return nil, err
+		}
+
+		b, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		if res.StatusCode != 200 {
+			return nil, errors.New(fmt.Sprintf("Failed GET request to Venly %s: %s", url, res.Status))
 		}
 
 		return b, nil
@@ -153,35 +194,45 @@ func (c *VenlyClient) SendRequest(t string, url string, data interface{}) ([]byt
 }
 
 func (c *VenlyClient) GetAccessToken() error {
-	url := VENLY_AUTH_URL + "/auth/realms/Arkane/protocol/openid-connect/token"
-	data := VenlyRequestGetAccessToken{
-		ClientId:     c.Config.ClientId,
-		ClientSecret: c.Config.ClientSecret,
-		GrantType:    "client_credentials",
+	uri := VENLY_AUTH_URL + "/auth/realms/Arkane/protocol/openid-connect/token"
+
+	data := url.Values{
+		"client_id":     {c.Config.ClientId},
+		"client_secret": {c.Config.ClientSecret},
+		"grant_type":    {"client_credentials"},
 	}
 
-	js, err := json.Marshal(data)
+	r, err := http.NewRequest("POST", uri, strings.NewReader(data.Encode()))
 	if err != nil {
 		return err
 	}
 
-	r, err := http.NewRequest("POST", url, bytes.NewBuffer(js))
+	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	res, err := c.Http.Do(r)
 	if err != nil {
 		return err
 	}
-
-	r.Header.Add("Content-Type", "application/json")
 
 	var resp VenlyResponseGetAccessToken
-	decoder := json.NewDecoder(r.Body)
-	err = decoder.Decode(&resp)
+	b, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}
 
-	c.Http.Transport = &http.Transport{}
+	err = json.Unmarshal(b, &resp)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Venly get access token response: ", string(b))
+
+	if res.StatusCode != 200 {
+		return errors.New(res.Status + ": failed to get access token")
+	}
 
 	c.AccessToken = resp.AccessToken
+	c.ExpiresAt = time.Now().Add(time.Duration(resp.ExpiresIn) * time.Second)
 
 	return nil
 }
@@ -205,10 +256,14 @@ func (c *VenlyClient) CreateWallet(data VenlyRequestCreateWallet) (VenlyWallet, 
 		return wallet, err
 	}
 
+	fmt.Println("Venly create wallet response: ", string(b))
+
 	err = json.Unmarshal(b, &resp)
 	if err != nil {
 		return wallet, err
 	}
+
+	fmt.Println("Venly create wallet: ", resp)
 
 	if !resp.Success {
 		return wallet, errors.New("failed to create wallet")
