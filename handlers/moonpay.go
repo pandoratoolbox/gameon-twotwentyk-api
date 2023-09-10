@@ -185,7 +185,7 @@ func WebhookMoonpayTransactionStatus(w http.ResponseWriter, r *http.Request) {
 	type localResponse struct {
 		Id              string    `json:"id"`
 		Status          string    `json:"status"`
-		TransactionHash []string  `json:"transactionHash"`
+		TransactionHash []string  `json:"hash"`
 		StatusChangedAt time.Time `json:"statusChangedAt"`
 		FailureReason   string    `json:"failureReason"`
 		Tokenid         []string  `json:"tokenid"`
@@ -196,9 +196,6 @@ func WebhookMoonpayTransactionStatus(w http.ResponseWriter, r *http.Request) {
 	for _, id := range tx_ids {
 		url = fmt.Sprint(url, id)
 		req, _ := http.NewRequest("GET", url, nil)
-
-		req.Header.Add("Accept", "application/json")
-		req.Header.Add("X-API-Key", "YOUR_API_KEY")
 
 		res, err := http.DefaultClient.Do(req)
 		if err != nil {
