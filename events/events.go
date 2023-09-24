@@ -26,25 +26,26 @@ package events
 // }
 
 // type EventHandler struct {
-// 	ID                      int64
-// 	Name                    string
-// 	Ctx                     context.Context
-// 	queue                   []Event
-// 	mu                      sync.RWMutex
-// 	config                  EventHandlerConfig
-// 	OnCreateUser            chan EventDataOnCreateUser
-// 	HandleCreateUser        func(EventDataOnCreateUser) error
-// 	OnUpdateUser            chan EventDataOnUpdateUser
-// 	HandleUpdateUser        func(EventDataOnUpdateUser) error
-// 	OnUpdateUserCredits     chan EventDataOnUpdateUserCredits
-// 	HandleUpdateUserCredits func(EventDataOnUpdateUserCredits) error
-// 	OnCreateOrder           chan EventDataOnCreateOrder
-// 	HandleCreateOrder       func(EventDataOnCreateOrder) error
-// 	OnUpdateOrder           chan EventDataOnUpdateOrder
-// 	HandleUpdateOrder       func(EventDataOnUpdateOrder) error
-// 	OnRequestPassword       chan EventDataOnRequestPassword
-// 	HandleRequestPassword   func(EventDataOnRequestPassword) error
-// 	OnError                 func(Event, error)
+// 	ID                           int64
+// 	Name                         string
+// 	Ctx                          context.Context
+// 	queue                        []Event
+// 	mu                           sync.RWMutex
+// 	config                       EventHandlerConfig
+// 	OnCreateUser                 chan EventDataOnCreateUser
+// 	HandleCreateUser             func(EventDataOnCreateUser) error
+// 	OnUpdateUser                 chan EventDataOnUpdateUser
+// 	HandleUpdateUser             func(EventDataOnUpdateUser) error
+// 	OnUpdateUserCredits          chan EventDataOnUpdateUserCredits
+// 	HandleUpdateUserCredits      func(EventDataOnUpdateUserCredits) error
+// 	OnCreateOrder                chan EventDataOnCreateOrder
+// 	HandleCreateOrder            func(EventDataOnCreateOrder) error
+// 	OnUpdateOrder                chan EventDataOnUpdateOrder
+// 	HandleUpdateOrder            func(EventDataOnUpdateOrder) error
+// 	OnRequestPassword            chan EventDataOnRequestPassword
+// 	HandleRequestPassword        func(EventDataOnRequestPassword) error
+// 	HandleCreateMarketplaceOffer func(EventDataOnCreateMarketplaceOffer) error
+// 	OnError                      func(Event, error)
 // }
 
 // type EventHandlerConfig struct {
@@ -61,9 +62,11 @@ package events
 
 // type EventDataOnUpdateUser models.User
 
-// type EventDataOnCreateOrder models.Order
+// type EventDataOnCreateMarketplaceOffer models.MarketplaceOffer
 
-// type EventDataOnUpdateOrder models.Order
+// type EventDataOnUpdateMarketplaceOffer models.MarketplaceOffer
+
+// type EventDataOnClaimStatusChanged models.Claim
 
 // type EventDataOnUpdateUserCredits struct {
 // 	UserId   int64
@@ -162,6 +165,30 @@ package events
 // 			if err != nil {
 // 				return err
 // 			}
+// 		}
+
+// 		return nil
+// 	}
+
+// 	h.HandleCreateMarketplaceOffer = func(d EventDataOnCreateMarketplaceOffer) error {
+// 		user, err := graphql.GetUser(context.Background(), *d.MarketplaceListing.OwnerId)
+// 		if err != nil {
+// 			return err
+// 		}
+
+// 		// data_platform := store
+
+// 		err = emails.SendTemplate(emails.EMAIL_ADDRESS_NOREPLY, *user.Email, emails.POSTMARK_TEMPLATE_ID_CREATE_ORDER, map[string]interface{}{
+// 			"username": *user.Username,
+// 			"amount":   *d.Amount,
+// 		})
+// 		if err != nil {
+// 			return err
+// 		}
+
+// 		err = notifications.SendNotification(*user.Id, EventDataOnCreateMarketplaceOffer)
+// 		if err != nil {
+// 			return err
 // 		}
 
 // 		return nil

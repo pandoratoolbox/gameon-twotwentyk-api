@@ -364,6 +364,22 @@ func BuyMarketplaceListing(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	buyer, err := store.GetUser(ctx, mid)
+	if err != nil {
+		ServeError(w, err.Error(), 500)
+		return
+	}
+
+	if buyer.Balance == nil {
+		ServeError(w, "User has no balance", 400)
+		return
+	}
+
+	if *buyer.Balance < *listing.Price {
+		ServeError(w, "User has insufficient balance", 400)
+		return
+	}
+
 	//REPLACE - create one postgres transaction so it can revert both if one balance update fails
 	err = store.AddBalanceToUser(ctx, *listing.OwnerId, *listing.Price)
 	if err != nil {

@@ -1,7 +1,0 @@
-#import "./fragments/Celebrity"
-
-query ListCelebrity {
-			celebrity() {
-				...Celebrity
-			}
-		}

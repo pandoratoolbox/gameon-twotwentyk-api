@@ -1,9 +1,0 @@
-fragment Celebrity on celebrity {
-		category
-		eligible_triggers
-		id
-		name
-		birth_day
-		birth_month
-		birth_year
-	}

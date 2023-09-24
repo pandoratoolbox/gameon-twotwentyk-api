@@ -29,26 +29,26 @@ func GetCardCollection(w http.ResponseWriter, r *http.Request) {
 	ServeJSON(w, data)
 }
 
-func NewCardCollection(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+// func NewCardCollection(w http.ResponseWriter, r *http.Request) {
+// 	ctx := r.Context()
 
-	input := models.CardCollection{}
+// 	input := models.CardCollection{}
 
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&input)
-	if err != nil {
-		ServeError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+// 	decoder := json.NewDecoder(r.Body)
+// 	err := decoder.Decode(&input)
+// 	if err != nil {
+// 		ServeError(w, err.Error(), http.StatusInternalServerError)
+// 		return
+// 	}
 
-	err = store.NewCardCollection(ctx, &input)
-	if err != nil {
-		ServeError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+// 	err = store.NewCardCollection(ctx, &input)
+// 	if err != nil {
+// 		ServeError(w, err.Error(), http.StatusInternalServerError)
+// 		return
+// 	}
 
-	ServeJSON(w, input)
-}
+// 	ServeJSON(w, input)
+// }
 
 func UpdateCardCollection(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()

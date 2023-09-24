@@ -19,6 +19,13 @@ import (
 func main() {
 	var err error
 
+	// _, err = DecodeAggPack("./agg_pack.json")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// os.Exit(0)
+
 	r := chi.NewRouter()
 
 	corsParams := cors.New(cors.Options{
@@ -83,18 +90,16 @@ func main() {
 			r.Group(func(r chi.Router) {
 				r.Use(handlers.RestrictAdmin)
 				r.Get("/", handlers.ListClaim)
-			})
 
-			r.Route("/{claim_id}", func(r chi.Router) {
-				r.Group(func(r chi.Router) {
-					r.Use(handlers.RestrictAdmin)
+				r.Route("/{claim_id}", func(r chi.Router) {
+					r.Get("/", handlers.GetClaim)
+					r.Put("/", handlers.UpdateClaim)
+					r.Delete("/", handlers.DeleteClaim)
 					r.Post("/approve", handlers.ApproveClaim)
 					r.Post("/reject", handlers.RejectClaim)
 				})
-				r.Get("/", handlers.GetClaim)
-				r.Put("/", handlers.UpdateClaim)
-				r.Delete("/", handlers.DeleteClaim)
 			})
+
 		})
 	})
 
@@ -236,6 +241,10 @@ func main() {
 				r.Post("/", handlers.WebhookMoonpayTransaction)
 			})
 		})
+	})
+
+	r.Route("/ws", func(r chi.Router) {
+		// r.Connect("/", handlers.WebsocketUpgrade)
 	})
 
 	err = http.ListenAndServe(":3333", r)

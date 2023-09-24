@@ -1,7 +1,0 @@
-#import "./fragments/Trigger"
-
-query ListTrigger {
-		trigger() {
-			...Trigger
-		}
-	}
