@@ -52,15 +52,33 @@ func GetCardCollection(w http.ResponseWriter, r *http.Request) {
 
 func UpdateCardCollection(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	q := chi.URLParam(r, "card_collection_id")
+	id, err := strconv.ParseInt(q, 10, 64)
+	if err != nil {
+		ServeError(w, err.Error(), 500)
+		return
+	}
 
 	data := models.CardCollection{}
 
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&data)
+	err = decoder.Decode(&data)
 	if err != nil {
 		ServeError(w, err.Error(), 400)
 		return
 	}
+
+	data.Id = &id
+
+	// if data.Status != nil {
+	// 	if *data.Status == 3 {
+	// 		err := nft.GenerateAggPack(data)
+	// 		if err != nil {
+	// 			ServeError(w, err.Error(), 500)
+	// 			return
+	// 		}
+	// 	}
+	// }
 
 	err = store.UpdateCardCollection(ctx, data)
 	if err != nil {

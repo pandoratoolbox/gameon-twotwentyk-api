@@ -146,10 +146,19 @@ func UpdateCardCollection(ctx context.Context, data models.CardCollection) error
 func GetCardCollection(ctx context.Context, id int64) (models.CardCollection, error) {
 	var data models.CardCollection
 
-	q := fragment_card_collection + `
+	q := fragment_card_collection + fragment_trigger + fragment_celebrity + fragment_card_series + `
 			query GetCardCollection {
 			card_collection(where: { id: { eq: $id } }) {
 				...CardCollection
+				card_series {
+					...CardSeries
+				}
+				celebrity {
+					...Celebrity
+				}
+				trigger {
+					...Trigger
+				}
 			}
 		}
 		`
@@ -191,10 +200,13 @@ func GetCardCollection(ctx context.Context, id int64) (models.CardCollection, er
 func ListCardCollection(ctx context.Context) ([]models.CardCollection, error) {
 	var data []models.CardCollection
 
-	q := fragment_card_collection + `
+	q := fragment_card_collection + fragment_card_series + `
 			query ListCardCollection {
 			card_collection {
 				...CardCollection
+				card_series {
+					...CardSeries
+				}
 			}
 		}
 		`

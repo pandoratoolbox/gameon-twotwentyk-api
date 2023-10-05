@@ -15,94 +15,13 @@ const (
 	CTX_user_timezone = ctxkey(3)
 )
 
-type NftCardYearData struct {
-	Rarity       *int64
-	CardSeriesId *int64
-	Id           *int64
-	Year         *int64
-	OwnerId      *int64
-	IsCrafted    *bool
-}
-
-type NftCardYear struct {
-	NftCardYearData
-	Owner              *User
-	CardSeries         *CardSeries
-	MarketplaceListing []*MarketplaceListing
-}
-
-type IdentityData struct {
-	Name       *string
-	BirthDay   *int64
-	BirthMonth *int64
-	BirthYear  *int64
-	Category   *string
-	Id         *int64
-}
-
-type Identity struct {
-	IdentityData
-}
-
-type TriggerData struct {
-	Name *string
-	Tier *string
-	Id   *int64
-}
-
-type Trigger struct {
-	TriggerData
-}
-
-type MarketplaceOfferData struct {
-	Status               *int64
-	MarketplaceListingId *int64
-	Amount               *int64
-	BuyerId              *int64
-	Id                   *int64
-}
-
-type MarketplaceOffer struct {
-	MarketplaceOfferData
-	MarketplaceListing *MarketplaceListing
-	Buyer              *User
-}
-
-type CardSeriesData struct {
-	Rarity           *int64
-	PctMonth         *int64
-	CardAmount       *int64
-	PctYear          *int64
-	Id               *int64
-	Quantity         *int64
-	Name             *string
-	PctEvent         *int64
-	CostUsd          *int64
-	CardCollectionId *int64
-	PctIdentity      *int64
-	PctDay           *int64
-}
-
-type CardSeries struct {
-	CardSeriesData
-	NftCardCategory   []*NftCardCategory
-	NftCardCrafting   []*NftCardCrafting
-	NftCardDayMonth   []*NftCardDayMonth
-	NftCardYear       []*NftCardYear
-	CardCollection    *CardCollection
-	NftCardIdentity   []*NftCardIdentity
-	NftCardPrediction []*NftCardPrediction
-	NftCardTrigger    []*NftCardTrigger
-	CardPack          []*CardPack
-}
-
 type ClaimData struct {
-	Id              *int64
 	Status          *int64
 	CreatedAt       *time.Time
 	ClaimerId       *int64
 	NftPredictionId *int64
 	ArticleId       *int64
+	Id              *int64
 }
 
 type Claim struct {
@@ -111,70 +30,165 @@ type Claim struct {
 	Article *Article
 }
 
-type CategoryData struct {
-	Id   *int64
-	Name *string
-}
-
-type Category struct {
-	CategoryData
-}
-
 type NftCardTriggerData struct {
-	Trigger      *string
+	Rarity       *int64
+	Tier         *string
 	Id           *int64
 	IsCrafted    *bool
-	Tier         *string
-	CardSeriesId *int64
 	OwnerId      *int64
-	Rarity       *int64
+	Trigger      *string
+	CardSeriesId *int64
+	CreatedAt    *time.Time
 }
 
 type NftCardTrigger struct {
 	NftCardTriggerData
-	CardSeries         *CardSeries
 	Owner              *User
 	MarketplaceListing []*MarketplaceListing
+	CardSeries         *CardSeries
 }
 
-type CardPackData struct {
-	CardSeriesId *int64
-	Cards        *CardPackCards
-	OwnerId      *int64
-	IsOpened     *bool
-	Tier         *int64
-	Id           *int64
-}
-
-type CardPack struct {
-	CardPackData
-	CardSeries *CardSeries
-	Owner      *User
+type CardSeries struct {
+	CardSeriesData
+	CardPack          []*CardPack
+	NftCardCrafting   []*NftCardCrafting
+	NftCardCategory   []*NftCardCategory
+	NftCardDayMonth   []*NftCardDayMonth
+	NftCardPrediction []*NftCardPrediction
+	NftCardIdentity   []*NftCardIdentity
+	NftCardTrigger    []*NftCardTrigger
+	NftCardYear       []*NftCardYear
+	CardCollection    *CardCollection
 }
 
 type NftCardDayMonthData struct {
-	Id           *int64
-	IsCrafted    *bool
-	CardSeriesId *int64
-	Rarity       *int64
 	Day          *int64
 	Month        *int64
 	OwnerId      *int64
+	Rarity       *int64
+	CardSeriesId *int64
+	Id           *int64
+	IsCrafted    *bool
+	CreatedAt    *time.Time
 }
 
 type NftCardDayMonth struct {
 	NftCardDayMonthData
-	CardSeries         *CardSeries
 	Owner              *User
 	MarketplaceListing []*MarketplaceListing
+	CardSeries         *CardSeries
+}
+
+type NftCardYearData struct {
+	OwnerId      *int64
+	IsCrafted    *bool
+	Id           *int64
+	Year         *int64
+	Rarity       *int64
+	CardSeriesId *int64
+	CreatedAt    *time.Time
+}
+
+type NftCardYear struct {
+	NftCardYearData
+	MarketplaceListing []*MarketplaceListing
+	Owner              *User
+	CardSeries         *CardSeries
+}
+
+type UserData struct {
+	Username       *string
+	CreatedAt      *time.Time
+	RoleIds        *Ints
+	Name           *string
+	Balance        *int64
+	Id             *int64
+	Password       *string
+	ExternalAuthId *string
+	WalletAddress  *string
+	VenlyId        *string
+	Email          *string
+	PhoneNumber    *string
+}
+
+type User struct {
+	UserData
+	NftCardYear        []*NftCardYear
+	NftCardCrafting    []*NftCardCrafting
+	CardPack           []*CardPack
+	Claim              []*Claim
+	NftCardTrigger     []*NftCardTrigger
+	NftCardPrediction  []*NftCardPrediction
+	NftCardIdentity    []*NftCardIdentity
+	MarketplaceOffer   []*MarketplaceOffer
+	MarketplaceListing []*MarketplaceListing
+	NftCardDayMonth    []*NftCardDayMonth
+	NftCardCategory    []*NftCardCategory
+}
+
+type CardCollection struct {
+	CardCollectionData
+	Trigger    []*Trigger
+	Celebrity  []*Celebrity
+	CardSeries []*CardSeries
+}
+
+type MarketplaceOfferData struct {
+	Amount               *int64
+	BuyerId              *int64
+	Id                   *int64
+	Status               *int64
+	MarketplaceListingId *int64
+}
+
+type MarketplaceOffer struct {
+	MarketplaceOfferData
+	MarketplaceListing *MarketplaceListing
+	Buyer              *User
+}
+
+type NftCardIdentityData struct {
+	IsCrafted     *bool
+	OwnerId       *int64
+	CelebrityName *string
+	Year          *int64
+	Category      *string
+	Rarity        *int64
+	CardSeriesId  *int64
+	Id            *int64
+	Month         *int64
+	Day           *int64
+	CreatedAt     *time.Time
+}
+
+type NftCardIdentity struct {
+	NftCardIdentityData
+	MarketplaceListing []*MarketplaceListing
+	CardSeries         *CardSeries
+	Owner              *User
+}
+
+type TriggerData struct {
+	CardCollectionId *int64
+	Id               *int64
+	Name             *string
+	Tier             *string
+	// RegDefinition    *float64
+	// RewardType       *int64
+}
+
+type Trigger struct {
+	TriggerData
+	CardCollection *CardCollection
 }
 
 type NftCardCraftingData struct {
+	CardSeriesId *int64
 	Id           *int64
 	IsCrafted    *bool
 	OwnerId      *int64
 	Rarity       *int64
-	CardSeriesId *int64
+	CreatedAt    *time.Time
 }
 
 type NftCardCrafting struct {
@@ -185,51 +199,21 @@ type NftCardCrafting struct {
 }
 
 type NftCardPredictionData struct {
+	IsClaimed     *bool
+	Triggers      *Strings
+	Id            *int64
+	CelebrityName *string
+	OwnerId       *int64
 	Rarity        *int64
 	CardSeriesId  *int64
-	Id            *int64
-	IsClaimed     *bool
-	OwnerId       *int64
-	Triggers      *Strings
-	CelebrityName *string
+	CreatedAt     *time.Time
 }
 
 type NftCardPrediction struct {
 	NftCardPredictionData
 	Owner              *User
-	CardSeries         *CardSeries
 	MarketplaceListing []*MarketplaceListing
-}
-
-type ArticleData struct {
-	ArticleSourceId *int64
-	Url             *string
-	ThumbnailSrc    *string
-	Title           *string
-	Tags            *Strings
-	Id              *int64
-	Excerpt         *string
-	CreatedAt       *time.Time
-}
-
-type Article struct {
-	ArticleData
-	Claim         []*Claim
-	ArticleSource *ArticleSource
-}
-
-type CelebrityData struct {
-	Category         *string
-	EligibleTriggers *Strings
-	Id               *int64
-	Name             *string
-	BirthDay         *int64
-	BirthMonth       *int64
-	BirthYear        *int64
-}
-
-type Celebrity struct {
-	CelebrityData
+	CardSeries         *CardSeries
 }
 
 type ArticleSourceData struct {
@@ -242,110 +226,122 @@ type ArticleSource struct {
 	Article []*Article
 }
 
-type MarketplaceListingData struct {
-	NftCardPredictionId *int64
-	Price               *int64
-	NftCardCraftingId   *int64
-	NftCardIdentityId   *int64
-	NftTypeId           *int64
-	CreatedAt           *time.Time
-	IsListed            *bool
-	NftCardTriggerId    *int64
-	NftCardDayMonthId   *int64
-	CardPackId          *int64
-	NftCardYearId       *int64
-	Id                  *int64
-	OwnerId             *int64
-	NftCardCategoryId   *int64
+type CelebrityData struct {
+	Id               *int64
+	Name             *string
+	BirthDay         *int64
+	BirthMonth       *int64
+	BirthYear        *int64
+	Category         *string
+	EligibleTriggers *Strings
+	CardCollectionId *int64
 }
 
-type MarketplaceListing struct {
-	MarketplaceListingData
-	IsOwned           bool
-	CardPack          *CardPack
-	NftCardTrigger    *NftCardTrigger
-	NftCardDayMonth   *NftCardDayMonth
-	NftCardPrediction *NftCardPrediction
-	NftCardYear       *NftCardYear
-	NftCardIdentity   *NftCardIdentity
-	Owner             *User
-	NftCardCrafting   *NftCardCrafting
-	NftCardCategory   *NftCardCategory
-	MarketplaceOffer  []*MarketplaceOffer
+type Celebrity struct {
+	CelebrityData
+	CardCollection *CardCollection
 }
 
-type CardCollectionData struct {
+type CategoryData struct {
 	Id   *int64
 	Name *string
 }
 
-type CardCollection struct {
-	CardCollectionData
-	CardSeries []*CardSeries
+type Category struct {
+	CategoryData
 }
 
-type UserData struct {
-	VenlyId        *string
-	CreatedAt      *time.Time
-	Password       *string
-	Id             *int64
-	Email          *string
-	ExternalAuthId *string
-	WalletAddress  *string
-	PhoneNumber    *string
-	Name           *string
-	Username       *string
-	RoleIds        *Ints
-	Balance        *int64
+type CardPackData struct {
+	Id           *int64
+	OwnerId      *int64
+	IsOpened     *bool
+	CardSeriesId *int64
+	Cards        *CardPackCards
+	Tier         *int64
+	CreatedAt    *time.Time
 }
 
-type User struct {
-	UserData
-	NftCardYear        []*NftCardYear
-	MarketplaceOffer   []*MarketplaceOffer
-	Claim              []*Claim
+type CardPack struct {
+	CardPackData
+	CardSeries         *CardSeries
+	Owner              *User
 	MarketplaceListing []*MarketplaceListing
-	NftCardTrigger     []*NftCardTrigger
-	NftCardPrediction  []*NftCardPrediction
-	NftCardCategory    []*NftCardCategory
-	NftCardIdentity    []*NftCardIdentity
-	CardPack           []*CardPack
-	NftCardCrafting    []*NftCardCrafting
-	NftCardDayMonth    []*NftCardDayMonth
 }
 
 type NftCardCategoryData struct {
-	IsCrafted    *bool
-	Id           *int64
 	Category     *string
 	OwnerId      *int64
+	Id           *int64
+	IsCrafted    *bool
 	Rarity       *int64
 	CardSeriesId *int64
+	CreatedAt    *time.Time
 }
 
 type NftCardCategory struct {
 	NftCardCategoryData
 	CardSeries         *CardSeries
-	MarketplaceListing []*MarketplaceListing
 	Owner              *User
+	MarketplaceListing []*MarketplaceListing
 }
 
-type NftCardIdentityData struct {
-	Year          *int64
-	IsCrafted     *bool
-	OwnerId       *int64
-	Category      *string
-	CardSeriesId  *int64
-	Id            *int64
-	Day           *int64
-	Rarity        *int64
-	Month         *int64
-	CelebrityName *string
+type MarketplaceListingData struct {
+	Id                  *int64
+	OwnerId             *int64
+	NftCardCraftingId   *int64
+	NftCardCategoryId   *int64
+	NftCardTriggerId    *int64
+	CardPackId          *int64
+	Price               *int64
+	IsListed            *bool
+	NftCardDayMonthId   *int64
+	NftCardYearId       *int64
+	NftCardIdentityId   *int64
+	CreatedAt           *time.Time
+	NftCardPredictionId *int64
+	NftTypeId           *int64
 }
 
-type NftCardIdentity struct {
-	NftCardIdentityData
-	MarketplaceListing []*MarketplaceListing
-	Owner              *User
-	CardSeries         *CardSeries
+type MarketplaceListing struct {
+	MarketplaceListingData
+	NftCardCrafting   *NftCardCrafting
+	NftCardPrediction *NftCardPrediction
+	Owner             *User
+	NftCardIdentity   *NftCardIdentity
+	NftCardYear       *NftCardYear
+	NftCardCategory   *NftCardCategory
+	NftCardDayMonth   *NftCardDayMonth
+	NftCardTrigger    *NftCardTrigger
+	MarketplaceOffer  []*MarketplaceOffer
+	CardPack          *CardPack
+}
+
+type IdentityData struct {
+	BirthMonth *int64
+	BirthYear  *int64
+	Category   *string
+	Id         *int64
+	Name       *string
+	BirthDay   *int64
+}
+
+type Identity struct {
+	IdentityData
+}
+
+type ArticleData struct {
+	Id              *int64
+	Excerpt         *string
+	Url             *string
+	CreatedAt       *time.Time
+	Title           *string
+	ArticleSourceId *int64
+	ThumbnailSrc    *string
+	Tags            *Strings
+}
+
+type Article struct {
+	ArticleData
+	ArticleSource *ArticleSource
+	Claim         []*Claim
 }

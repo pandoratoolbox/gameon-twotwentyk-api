@@ -1,12 +1,8 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
+	"errors"
 	"gameon-twotwentyk-api/models"
-	"io/ioutil"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 type AggPack struct {
@@ -15,105 +11,175 @@ type AggPack struct {
 	// 3 x tier -> 12 x card type -> array of card amount values for each card pack in collection
 }
 
-type CollectionCards []map[int64]models.CardPackConfig
+// func DecodeAggPack(collection models.CardCollection, path string) (map[string]map[int64]models.CardPackConfig, error) {
 
-func DecodeAggPack(path string) (CollectionCards, error) {
+// 	b, err := ioutil.ReadFile(path)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	b, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, err
+// 	// fmt.Println(string(b))
+
+// 	var agg_pack AggPack
+// 	err = json.Unmarshal(b, &agg_pack.Tier)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	cards := make(map[string]map[int64]models.CardPackConfig)
+
+// 	for s, series := range collection.CardSeries {
+// 		cards_per_pack := *series.CardsPerPack
+// 		index := int64(0)
+
+// 		for a := 0; a < int(*series.CardPackQuantity); a++ {
+// 			card := models.CardPackConfig{}
+
+// 			for i := 0; i < int(cards_per_pack); i++ {
+
+// 				for cti := 0; cti < (4 * len(rarities)); cti++ {
+// 					//for i := 0; i < 4; i++ //loop over card types for each rarity
+// 					v := agg_pack.Tier[s][cti][index]
+
+// 					if fmt.Sprintf("%T", v) == "float64" {
+// 						if v.(float64) == 0 {
+// 							continue
+// 						}
+// 					}
+
+// 					var card models.CardPackConfig
+// 					c, ok := cards[*series.Name][int64(a)]
+// 					if ok {
+// 						card = c
+// 					}
+
+// 					card.CardPackId = int64(a) + 1
+// 					card.Tier = *series.Name
+
+// 					switch cti {
+// 					case 0:
+// 						card.Contains.Rare.Year++
+// 					case 1:
+// 						card.Contains.Rare.DayMonth++
+// 					case 2:
+// 						card.Contains.Rare.Category++
+// 					case 3:
+// 						if fmt.Sprintf("%T", v) == "string" {
+// 							t_strs := strings.Split(strings.TrimSpace(v.(string)), "_")
+// 							t_tier := ""
+// 							if t_strs[1] == "Minor" {
+// 								t_tier = "Minor_" + t_strs[2]
+// 							}
+
+// 							if t_strs[1] == "Major" {
+// 								t_tier = "Major"
+// 							}
+
+// 							t_id, err := strconv.ParseInt(t_strs[len(t_strs)-1], 10, 64)
+// 							if err != nil {
+// 								return nil, err
+// 							}
+
+// 							card.Contains.Rare.Trigger = append(card.Contains.Rare.Trigger, struct {
+// 								Name string
+// 								Tier string
+// 								Id   int64
+// 							}{
+// 								Tier: t_tier,
+// 								Id:   t_id,
+// 							})
+
+// 						}
+// 					case 4:
+// 						card.Contains.Uncommon.Year++
+// 					case 5:
+// 						card.Contains.Uncommon.DayMonth++
+// 					case 6:
+// 						card.Contains.Uncommon.Category++
+// 					case 7:
+// 						if fmt.Sprintf("%T", v) == "string" {
+// 							t_strs := strings.Split(strings.TrimSpace(v.(string)), "_")
+// 							t_tier := ""
+// 							if t_strs[1] == "Minor" {
+// 								t_tier = "Minor_" + t_strs[2]
+// 							}
+
+// 							if t_strs[1] == "Major" {
+// 								t_tier = "Major"
+// 							}
+
+// 							t_id := t_strs[len(t_strs)-1]
+
+// 							card.Contains.Uncommon.Trigger.Id, err = strconv.ParseInt(t_id, 10, 64)
+// 							if err != nil {
+// 								return nil, err
+// 							}
+
+// 							card.Contains.Uncommon.Trigger.Tier = t_tier
+// 						}
+// 					case 8:
+// 						card.Contains.Core.Year++
+// 					case 9:
+// 						card.Contains.Core.DayMonth++
+// 					case 10:
+// 						card.Contains.Core.Category++
+// 					case 11:
+// 						if fmt.Sprintf("%T", v) == "string" {
+// 							t_strs := strings.Split(strings.TrimSpace(v.(string)), "_")
+// 							t_tier := ""
+// 							if t_strs[1] == "Minor" {
+// 								t_tier = "Minor_" + t_strs[2]
+// 							}
+
+// 							if t_strs[1] == "Major" {
+// 								t_tier = "Major"
+// 							}
+
+// 							t_id := t_strs[len(t_strs)-1]
+
+// 							card.Contains.Core.Trigger.Id, err = strconv.ParseInt(t_id, 10, 64)
+// 							if err != nil {
+// 								return nil, err
+// 							}
+
+// 							card.Contains.Core.Trigger.Tier = t_tier
+
+// 							amount, err := strconv.ParseInt(t_strs[0], 10, 64)
+// 							if err != nil {
+// 								return nil, err
+// 							}
+
+// 							card.Contains.Core.Trigger.Amount = amount
+
+// 						}
+// 					}
+// 				}
+
+// 				index++
+// 			}
+
+// 			cards[*series.Name][int64(a)] = card
+
+// 		}
+// 	}
+// 	js, err := json.Marshal(cards)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	// fmt.Println(string(js))
+
+// 	err = ioutil.WriteFile("agg_out.json", js, 0644)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	return cards, nil
+// }
+
+func GenerateAggPack(collection models.CardCollection) error {
+	if *collection.Status != 3 {
+		return errors.New("Status must be 3 to generate agg pack")
 	}
 
-	// fmt.Println(string(b))
-
-	var agg_pack AggPack
-	err = json.Unmarshal(b, &agg_pack.Tier)
-	if err != nil {
-		return nil, err
-	}
-
-	var cards []map[int64]models.CardPackConfig
-	for t, tier := range agg_pack.Tier {
-		cards = append(cards, make(map[int64]models.CardPackConfig))
-		t_name := ""
-		switch t {
-		case 0:
-			t_name = "standard"
-		case 1:
-			t_name = "premium"
-		case 2:
-			t_name = "elite"
-		}
-		for cti, card_type := range tier {
-			for i, v := range card_type {
-				if fmt.Sprintf("%T", v) == "float64" {
-					if v.(float64) == 0 {
-						continue
-					}
-				}
-
-				var card models.CardPackConfig
-				c, ok := cards[t][i]
-				if ok {
-					card = c
-					fmt.Printf("Card %d already exists in tier %s, adding %v\n", i, t_name, v)
-					spew.Dump(c)
-				}
-
-				card.Changed++
-				card.CardPackId = i
-				card.Tier = t_name
-
-				switch cti {
-				case 0:
-					card.Contains.Rare.Year = int64(v.(float64))
-				case 1:
-					card.Contains.Rare.DayMonth = int64(v.(float64))
-				case 2:
-					card.Contains.Rare.Category = int64(v.(float64))
-				case 3:
-					if fmt.Sprintf("%T", v) == "string" {
-						card.Contains.Rare.Trigger = v.(string)
-					}
-				case 4:
-					card.Contains.Uncommon.Year = int64(v.(float64))
-				case 5:
-					card.Contains.Uncommon.DayMonth = int64(v.(float64))
-				case 6:
-					card.Contains.Uncommon.Category = int64(v.(float64))
-				case 7:
-					if fmt.Sprintf("%T", v) == "string" {
-						card.Contains.Uncommon.Trigger = v.(string)
-					}
-				case 8:
-					card.Contains.Core.Year = int64(v.(float64))
-				case 9:
-					card.Contains.Core.DayMonth = int64(v.(float64))
-				case 10:
-					card.Contains.Core.Category = int64(v.(float64))
-				case 11:
-					if fmt.Sprintf("%T", v) == "string" {
-						card.Contains.Core.Trigger = v.(string)
-					}
-				}
-
-				cards[t][i] = card
-			}
-		}
-
-	}
-
-	js, err := json.Marshal(cards)
-	if err != nil {
-		return nil, err
-	}
-
-	// fmt.Println(string(js))
-
-	err = ioutil.WriteFile("agg_out.json", js, 0644)
-	if err != nil {
-		return nil, err
-	}
-
-	return cards, nil
+	return nil
 }

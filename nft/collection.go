@@ -1,6 +1,8 @@
 package nft
 
-import "gameon-twotwentyk-api/models"
+import (
+	"gameon-twotwentyk-api/models"
+)
 
 const WALLET_KEY_PRIVATE = "wallet_key_private"
 
@@ -38,41 +40,172 @@ type CollectionConfigPack struct {
 }
 
 func CreateCardCollection(data models.CardCollection, agg_pack AggPack) error {
-	//load data into alex's engine
-	//wait for alex's engine to return
-	//store metadata in ipfs
-	//mint nft card packs
-
-	//dayMonth, year, category, trigger
-
-	//core, uncommon, rare
-
-	// rare_count := int64(0)
-	// uncommon_count := int64(0)
-	// core_count := int64(0)
-
-	// cards_per_pack = int64(0)
-	// pack_quantity = int64(0)
-	// price = int64(0)
-
-	// guaranteed_core_count = 0
-	// guaranteed_uncommon_count = 0
-	// guaranteed_rare_count = 0
-
-	// for _, series := range data.CardSeries {
-	// 	if *series.Rarity == models.NFT_RARITY_COMMON {
-	// 		core_count = *series.CardAmount
-	// 	}
-
-	// 	if *series.Rarity == models.NFT_RARITY_UNCOMMON {
-	// 		uncommon_count = *series.CardAmount
-	// 	}
-
-	// 	if *series.Rarity == models.NFT_RARITY_RARE {
-	// 		rare_count = *series.CardAmount
-	// 	}
-
-	// }
 
 	return nil
 }
+
+// func OpenCardPack(ctx context.Context, card_collection_id int64, card_pack_id int64) error {
+
+// 	collection, err := store.GetCardCollection(ctx, card_collection_id)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	card_pack, err := store.GetCardPack(ctx, card_pack_id)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	owner, err := store.GetUser(ctx, *card_pack.OwnerId)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	owner_address := *owner.WalletAddress
+
+// 	// card_pack_config, err := store.GetCardPackConfig(ctx, card_collection_id, card_pack_id)
+// 	// if err != nil {
+// 	// 	return err
+// 	// }
+
+// 	card_pacK_config := models.CardPackConfig{}
+
+// 	for _, core_trigger := range card_pacK_config.Contains.Core.Trigger {
+// 		rarity := models.NFT_RARITY_COMMON
+// 		triggers, err := store.ListTriggers(ctx)
+// 		if err != nil {
+// 			return err
+// 		}
+// 		rnd_trigger := triggers(rand.Intn(len(triggers)))
+// 		// trigger_tier := rnd_trigger.Tier
+// 		// id := rnd_trigger.Id
+
+// 		trigger_name := rnd_trigger.Name
+// 		trigger_tier := rnd_trigger.Tier
+
+// 		is_crafted := false
+
+// 		nft_trigger := models.NftCardTrigger{
+// 			NftCardTriggerData: models.NftCardTriggerData{
+// 				Trigger:   &trigger_name,
+// 				Tier:      &trigger_tier,
+// 				IsCrafted: &is_crafted,
+// 				Rarity:    &rarity,
+// 			},
+// 		}
+
+// 		err = store.NewNftCardTrigger(ctx, &nft_trigger)
+// 		if err != nil {
+// 			return err
+// 		}
+
+// 		tokenId := *nft_trigger.Id
+
+// 		err = nft.CreateTriggerCard(owner_address, collectionId, tokenId, tokenURI, nft_trigger)
+// 		if err != nil {
+// 			return err
+// 		}
+
+// 	}
+
+// 	for _, core_year := range card_pacK_config.Contains.Core.Year {
+// 		rarity := models.NFT_RARITY_COMMON
+// 		celebrities, err := store.ListCelebrity(ctx)
+// 		if err != nil {
+// 			return err
+// 		}
+// 		rnd_celebrity := celebrities(rand.Intn(len(celebrities)))
+// 		year := rnd_celebrity.BirthYear
+// 		is_crafted := false
+
+// 		nft_day_year := models.NftCardYear{
+// 			NftCardYearData: models.NftCardYearData{
+// 				Year:      &year,
+// 				IsCrafted: &is_crafted,
+// 				Rarity:    &rarity,
+// 			},
+// 		}
+
+// 		err = store.NewNftCardYear(ctx, &nft_day_year)
+// 		if err != nil {
+// 			return err
+// 		}
+
+// 		tokenId := *nft_day_year.Id
+
+// 		err = nft.CreateYearCard(owner_address, collectionId, tokenId, tokenURI, nft_day_year)
+// 		if err != nil {
+// 			return err
+// 		}
+// 	}
+
+// 	for _, core_day_month := range card_pacK_config.Contains.Core.DayMonth {
+// 		rarity := models.NFT_RARITY_COMMON
+// 		celebrities, err := store.ListCelebrity(ctx)
+// 		if err != nil {
+// 			return err
+// 		}
+// 		rnd_celebrity := celebrities(rand.Intn(len(celebrities)))
+// 		day := rnd_celebrity.BirthDay
+// 		month := rnd_celebrity.BirthMonth
+// 		is_crafted := false
+
+// 		nft_day_month := models.NftCardDayMonth{
+// 			NftCardDayMonthData: models.NftCardDayMonthData{
+// 				Day:       &day,
+// 				Month:     &month,
+// 				IsCrafted: &is_crafted,
+// 				Rarity:    &rarity,
+// 			},
+// 		}
+
+// 		err = store.NewNftCardDayMonth(ctx, &nft_day_month)
+// 		if err != nil {
+// 			return err
+// 		}
+
+// 		tokenId := *nft_day_month.Id
+
+// 		err = nft.CreateDayMonthCard(owner_address, collectionId, tokenId, tokenURI, nft_day_month)
+// 		if err != nil {
+// 			return err
+// 		}
+// 	}
+
+// 	for _, core_category := range card_pacK_config.Contains.Core.Category {
+
+// 		//get random category
+// 		rarity := models.NFT_RARITY_COMMON
+// 		celebrities, err := store.ListCelebrity(ctx)
+// 		if err != nil {
+// 			return err
+// 		}
+// 		rnd_celebrity := celebrities(rand.Intn(len(celebrities)))
+// 		category_name := rnd_celebrity.Category
+// 		is_crafted := false
+
+// 		nft_category := models.NftCardCategory{
+// 			NftCardCategoryData: models.NftCardCategoryData{
+// 				Name:      &category_name,
+// 				Rarity:    &rarity,
+// 				IsCrafted: &is_crafted,
+// 				Category:  &category_name,
+// 			},
+// 		}
+
+// 		err = store.NewNftCardCategory(ctx, &nft_category)
+// 		if err != nil {
+// 			return err
+// 		}
+
+// 		tokenId := *nft_category.Id
+
+// 		err = nft.CreateCategoryCard(owner_address, collectionId, tokenId, tokenURI, nft_category)
+// 		if err != nil {
+// 			return err
+// 		}
+// 		// mint core
+// 	}
+
+// 	return nil
+// }

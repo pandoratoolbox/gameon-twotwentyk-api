@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"gameon-twotwentyk-api/models"
@@ -19,7 +22,24 @@ const (
 	MOONPAY_PUBLISHABLE_KEY = "pk_test_PaUTi3HVAHvclaZTMJS0TNTfMIrpPj"
 )
 
+type MoonpayNft struct {
+	TokenId           string  `json:"tokenId,omitempty"`
+	ContractAddress   string  `json:"contractAddress,omitempty"`
+	Name              string  `json:"name,omitempty"`
+	Collection        string  `json:"collection,omitempty"`
+	ImageUrl          string  `json:"imageUrl,omitempty"`
+	ExplorerUrl       string  `json:"explorerUrl,omitempty"`
+	Price             float64 `json:"price,omitempty"`
+	PriceCurrencyCode string  `json:"priceCurrencyCode,omitempty"`
+	Quantity          int64   `json:"quantity,omitempty"`
+	SellerAddress     string  `json:"sellerAddress,omitempty"`
+	SellType          string  `json:"sellType,omitempty"`
+	Flow              string  `json:"flow,omitempty"`
+	Network           string  `json:"network,omitempty"`
+}
+
 func WebhookMoonpayGetNftInfo(w http.ResponseWriter, r *http.Request) {
+	var out MoonpayNft
 	ctx := r.Context()
 
 	contract_address := chi.URLParam(r, "contract_address")
@@ -29,7 +49,33 @@ func WebhookMoonpayGetNftInfo(w http.ResponseWriter, r *http.Request) {
 	//0 doesn't pass through json encoding - fix in custom encoderS
 	token_id := int64(14)
 
+	t_secondary := MoonpayNft{
+		TokenId:           token_id_q,
+		ContractAddress:   contract_address,
+		PriceCurrencyCode: "USDC",
+		SellType:          "Secondary",
+		Flow:              "Lite",
+		Network:           "polygon",
+		Quantity:          1,
+		// ImageUrl:          "https://www.debate.com.mx/__export/1491334879891/sites/debate/img/2017/04/04/macaco_crop1491334754748.jpg_423682103.jpg",
+	}
+
+	t_primary := MoonpayNft{
+		TokenId:           "__1", //return same tokenId but save transaction in our database with real new generated tokenID
+		ContractAddress:   contract_address,
+		PriceCurrencyCode: "USDC",
+		SellType:          "Primary",
+		Flow:              "Lite",
+		Network:           "polygon",
+		Quantity:          1,
+		Price:             1,
+		Collection:        "genesis",
+		Name:              "elite card pack",
+		// ImageUrl:          "https://www.debate.com.mx/__export/1491334879891/sites/debate/img/2017/04/04/macaco_crop1491334754748.jpg_423682103.jpg",
+	}
+
 	if !strings.Contains(token_id_q, "_") {
+		out = t_secondary
 		var err error
 		token_id, err = strconv.ParseInt(token_id_q, 10, 64)
 		if err != nil {
@@ -37,6 +83,8 @@ func WebhookMoonpayGetNftInfo(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+	} else {
+		out = t_primary
 	}
 
 	// listing_id_q := r.URL.Query().Get("listingId")
@@ -52,35 +100,13 @@ func WebhookMoonpayGetNftInfo(w http.ResponseWriter, r *http.Request) {
 		Id   int64
 		Name string
 	}{
-		Id:   models.NFT_TYPE_ID_CATEGORY,
-		Name: "category",
-	}
-
-	out := struct {
-		TokenId           string `json:"tokenId"`
-		ContractAddress   string `json:"contractAddress"`
-		Name              string `json:"name"`
-		Collection        string `json:"collection"`
-		ImageUrl          string `json:"imageUrl"`
-		ExplorerUrl       string `json:"explorerUrl"`
-		Price             string `json:"price"`
-		PriceCurrencyCode string `json:"priceCurrencyCode"`
-		Quantity          int64  `json:"quantity"`
-		SellerAddress     string `json:"sellerAddress"`
-		SellType          string `json:"sellType"`
-		Flow              string `json:"flow"`
-		Network           string `json:"network"`
-	}{
-		TokenId:           token_id_q,
-		ContractAddress:   contract_address,
-		PriceCurrencyCode: "USD",
-		SellType:          "Secondary",
-		Flow:              "Lite",
-		Network:           "polygon",
-		Quantity:          1,
+		Id:   models.NFT_TYPE_ID_CARD_PACK,
+		Name: "card packs",
 	}
 
 	switch nft_collection.Id {
+	case models.NFT_TYPE_ID_CARD_PACK:
+		break
 	case models.NFT_TYPE_ID_CATEGORY:
 		listings, err := store.SearchMarketplaceListings(ctx, "", 1, []int64{nft_collection.Id}, 1, token_id, true)
 		if err != nil {
@@ -105,7 +131,7 @@ func WebhookMoonpayGetNftInfo(w http.ResponseWriter, r *http.Request) {
 		out.Name = fmt.Sprintf("%s %s Category Card", *nft.Category, rarity)
 		out.Collection = nft_collection.Name
 		out.SellerAddress = *listing.Owner.WalletAddress
-		out.Price = strconv.FormatInt(*listing.Price, 10)
+		out.Price = float64(*listing.Price)
 		break
 	case models.NFT_TYPE_ID_CRAFTING:
 	case models.NFT_TYPE_ID_DAY_MONTH:
@@ -130,21 +156,23 @@ func WebhookMoonpayGetNftInfo(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(string(js))
 
-	w.Write([]byte(`{
-		"tokenId":"109",
-		"contractAddress":"0x2180c6ecf2f770bd51dbb0d779cc81048899",
-		"name":"MoonRocket",
-		"collection":"MoonPay Special Collection",
-		"imageUrl":"https://b1ic5m3wqxz9zd.cloudfront.net/f793.jpg",
-		"explorerUrl":"",
-		"price":0.1,
-		"priceCurrencyCode":"ETH",
-		"quantity":1,
-		"sellerAddress":"0xt246e19c76a23068fa235e1673c10opecfbeb7hf",
-		"sellType":"Primary",
-		"flow":"Lite",
-		"network":"Ethereum"
-	 }`))
+	// w.Write([]byte(`{
+	// 	"tokenId":"109",
+	// 	"contractAddress":"0x2180c6ecf2f770bd51dbb0d779cc81048899",
+	// 	"name":"MoonRocket",
+	// 	"collection":"MoonPay Special Collection",
+	// 	"imageUrl":"https://b1ic5m3wqxz9zd.cloudfront.net/f793.jpg",
+	// 	"explorerUrl":"",
+	// 	"price":0.1,
+	// 	"priceCurrencyCode":"ETH",
+	// 	"quantity":1,
+	// 	"sellerAddress":"0xt246e19c76a23068fa235e1673c10opecfbeb7hf",
+	// 	"sellType":"Primary",
+	// 	"flow":"Lite",
+	// 	"network":"Ethereum"
+	//  }`))
+
+	w.Write(js)
 
 }
 
@@ -195,3 +223,39 @@ func WebhookMoonpayTransaction(w http.ResponseWriter, r *http.Request) {
 // 		tokenId         string
 // 	}{}
 // }
+
+func MoonpaySignUrl(w http.ResponseWriter, r *http.Request) {
+	input := struct {
+		Url string `json:"url"`
+	}{}
+
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&input)
+	if err != nil {
+		ServeError(w, err.Error(), 500)
+		return
+	}
+
+	fmt.Println("URL: " + input.Url)
+
+	// host := strings.Split(input.Url, "?")[0]
+	query := "?" + strings.Split(input.Url, "?")[1]
+	secret := MOONPAY_SECRET_KEY
+	// Create a new HMAC by defining the hash type and the key (as byte array)
+	h := hmac.New(sha256.New, []byte(secret))
+
+	// Write Data to it
+	h.Write([]byte(query))
+
+	// Get result and encode as hexadecimal string
+	// sha := hex.EncodeToString()
+
+	// sha := base64.URLEncoding.EncodeToString(h.Sum(nil))
+	sha := base64.StdEncoding.EncodeToString(h.Sum(nil))
+	fmt.Println("Signature: " + sha)
+	ServeJSON(w, struct {
+		Signature string
+	}{
+		Signature: sha,
+	})
+}

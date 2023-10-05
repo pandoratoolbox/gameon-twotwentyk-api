@@ -129,7 +129,7 @@ func (c *VenlyClient) SendRequest(t string, url string, data interface{}) ([]byt
 				return nil, err
 			}
 
-			fmt.Println("Venly send request response: ", string(b))
+			// fmt.Println("Venly send request response: ", string(b))
 
 			if res.StatusCode != 200 {
 				return nil, errors.New(fmt.Sprintf("Failed POST request to Venly %s: %s", url, res.Status))
@@ -225,7 +225,7 @@ func (c *VenlyClient) GetAccessToken() error {
 		return err
 	}
 
-	fmt.Println("Venly get access token response: ", string(b))
+	// fmt.Println("Venly get access token response: ", string(b))
 
 	if res.StatusCode != 200 {
 		return errors.New(res.Status + ": failed to get access token")
@@ -256,14 +256,14 @@ func (c *VenlyClient) CreateWallet(data VenlyRequestCreateWallet) (VenlyWallet, 
 		return wallet, err
 	}
 
-	fmt.Println("Venly create wallet response: ", string(b))
+	// fmt.Println("Venly create wallet response: ", string(b))
 
 	err = json.Unmarshal(b, &resp)
 	if err != nil {
 		return wallet, err
 	}
 
-	fmt.Println("Venly create wallet: ", resp)
+	// fmt.Println("Venly create wallet: ", resp)
 
 	if !resp.Success {
 		return wallet, errors.New("failed to create wallet")

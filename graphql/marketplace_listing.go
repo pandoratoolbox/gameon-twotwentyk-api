@@ -242,6 +242,14 @@ func SearchMarketplaceListings(ctx context.Context, q string, card_collection_id
 
 	for _, v := range nft_type_ids {
 		switch v {
+		case models.NFT_TYPE_ID_CARD_PACK:
+			fragments += `
+		
+		` + fragment_card_pack
+			q_nft += `
+			card_pack {
+			...CardPack
+		}`
 		case models.NFT_TYPE_ID_CATEGORY:
 			fragments += `
 		

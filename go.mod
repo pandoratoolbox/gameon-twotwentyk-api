@@ -41,6 +41,7 @@ require (
 	github.com/goccy/go-json v0.9.7 // indirect
 	github.com/golang-jwt/jwt/v4 v4.4.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
+	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/s2a-go v0.1.4 // indirect
 	github.com/google/uuid v1.3.0 // indirect
@@ -82,6 +83,7 @@ require (
 	github.com/subosito/gotenv v1.4.1 // indirect
 	github.com/tideland/golib v4.24.2+incompatible // indirect
 	github.com/tideland/gorest v2.15.5+incompatible // indirect
+	github.com/twilio/twilio-go v1.14.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.36.4 // indirect
 	go.opentelemetry.io/otel v1.11.1 // indirect

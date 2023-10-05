@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"gameon-twotwentyk-api/models"
 	"gameon-twotwentyk-api/store"
 
+	"github.com/go-chi/chi"
 	"github.com/pandoratoolbox/json"
 )
 
@@ -15,8 +17,7 @@ func CreateNftCollection(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	input := struct {
-		Name       string
-		CardSeries []models.CardSeriesData
+		Name string
 	}{}
 
 	decoder := json.NewDecoder(r.Body)
@@ -26,9 +27,21 @@ func CreateNftCollection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	list, err := store.ListCardCollection(ctx)
+	if err != nil {
+		ServeError(w, err.Error(), 500)
+		return
+	}
+
+	name := "Collection " + strconv.Itoa(len(list)+1)
+
+	if input.Name != "" {
+		name = input.Name
+	}
+
 	card_collection := models.CardCollection{
 		CardCollectionData: models.CardCollectionData{
-			Name: &input.Name,
+			Name: &name,
 		},
 	}
 
@@ -38,10 +51,33 @@ func CreateNftCollection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ServeJSON(w, card_collection)
+}
+
+func UpdateNftCollectionConfig(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	collection_id, err := strconv.ParseInt(chi.URLParam(r, "card_collection_id"), 10, 64)
+	if err != nil {
+		ServeError(w, err.Error(), 500)
+		return
+	}
+
+	input := struct {
+		CardSeries []models.CardSeriesData
+	}{}
+
+	decoder := json.NewDecoder(r.Body)
+	err = decoder.Decode(&input)
+	if err != nil {
+		ServeError(w, err.Error(), 500)
+		return
+	}
+
 	var card_series []*models.CardSeries
 
 	for _, v := range input.CardSeries {
-		v.CardCollectionId = card_collection.Id
+		v.CardCollectionId = &collection_id
 
 		o := models.CardSeries{
 			CardSeriesData: v,
@@ -60,7 +96,4 @@ func CreateNftCollection(w http.ResponseWriter, r *http.Request) {
 		//generate nft card packs from agg_pack json
 	}
 
-	card_collection.CardSeries = card_series
-
-	ServeJSON(w, card_collection)
 }

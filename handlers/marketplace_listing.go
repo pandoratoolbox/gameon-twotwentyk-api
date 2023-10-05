@@ -169,7 +169,7 @@ func NewMarketplaceListing(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case models.NFT_TYPE_ID_CARD_PACK:
-		if input.NftCardYearId == nil {
+		if input.CardPackId == nil {
 			ServeError(w, "card_pack_id must be specified", 400)
 			return
 		}

@@ -111,7 +111,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	err = registerNewUser(ctx, user)
+	err = registerNewUser(ctx, &user)
 	if err != nil {
 		ServeError(w, err.Error(), 500)
 		return

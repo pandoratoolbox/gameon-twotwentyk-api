@@ -35,7 +35,7 @@ func ReceiveAggPack(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateCardCollection(w http.ResponseWriter, r *http.Request) {
-	input := models.CollectionCreation{}
+	input := models.CardCollection{}
 
 	err := json.NewDecoder(r.Body).Decode(&input)
 	if err != nil {
@@ -44,7 +44,7 @@ func CreateCardCollection(w http.ResponseWriter, r *http.Request) {
 	}
 
 	input.AggPackPath = nil
-	input.ID = nil
+	input.Id = nil
 
 	// err = store.NewCardCollection(ctx, &input)
 	// if err != nil {

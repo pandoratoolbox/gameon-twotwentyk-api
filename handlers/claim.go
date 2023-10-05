@@ -113,10 +113,17 @@ func NewClaim(w http.ResponseWriter, r *http.Request) {
 func UpdateClaim(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
+	id, err := strconv.ParseInt(chi.URLParam(r, "claim_id"), 10, 64)
+	if err != nil {
+		ServeError(w, err.Error(), 400)
+		return
+	}
+
 	data := models.Claim{}
+	data.Id = &id
 
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&data)
+	err = decoder.Decode(&data)
 	if err != nil {
 		ServeError(w, err.Error(), 400)
 		return

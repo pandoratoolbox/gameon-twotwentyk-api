@@ -107,7 +107,7 @@ func ImportArticles() {
 
 }
 
-func ImportCelebrities() error {
+func ImportCelebrities(path string) error {
 	var err error
 	var categories []string
 	celebrities, err := GetCelebritiesWithBirthdates()
@@ -115,7 +115,7 @@ func ImportCelebrities() error {
 		return err
 	}
 
-	file, err := os.Open("celebrities.csv")
+	file, err := os.Open(path)
 	if err != nil {
 		return err
 	}

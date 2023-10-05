@@ -164,6 +164,17 @@ func BuyCardSeriesPack(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user, err := store.GetUser(ctx, mid)
+	if err != nil {
+		ServeError(w, err.Error(), 400)
+		return
+	}
+
+	if *user.Balance < *series.CostUsd {
+		ServeError(w, "Insufficient funds", 400)
+		return
+	}
+
 	// count, err := store.GetCardPackCountByCardSeriesId(ctx, input.CardSeriesId)
 	// if err != nil {
 	// 	ServeError(w, err.Error(), 400)

@@ -104,7 +104,9 @@ func ReflectToFragment(data interface{}) string {
 
 func Init() error {
 	var err error
-	conf := core.Config{}
+	conf := core.Config{
+		DefaultLimit: 1000000,
+	}
 	Graph, err = core.NewGraphJin(&conf, connections.Postgres)
 
 	if err != nil {

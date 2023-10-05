@@ -60,7 +60,7 @@ func AuthApple(w http.ResponseWriter, r *http.Request) {
 			},
 		}
 
-		err = registerNewUser(ctx, user)
+		err = registerNewUser(ctx, &user)
 		if err != nil {
 			ServeError(w, err.Error(), 500)
 			return
@@ -149,7 +149,7 @@ func AuthGoogle(w http.ResponseWriter, r *http.Request) {
 			},
 		}
 
-		err = registerNewUser(ctx, user)
+		err = registerNewUser(ctx, &user)
 		if err != nil {
 			ServeError(w, err.Error(), 400)
 			return
@@ -195,8 +195,8 @@ func AuthGoogle(w http.ResponseWriter, r *http.Request) {
 	ServeJSON(w, out)
 }
 
-func registerNewUser(ctx context.Context, user models.User) error {
-	err := store.NewUser(ctx, &user)
+func registerNewUser(ctx context.Context, user *models.User) error {
+	err := store.NewUser(ctx, user)
 	if err != nil {
 		return err
 	}

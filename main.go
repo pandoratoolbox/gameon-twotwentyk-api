@@ -50,6 +50,13 @@ func main() {
 	store.RefreshTriggerMap(context.Background())
 	// store.RefreshNftCollectionMap(context.Background())
 
+	// col, err := store.GetCardCollection(context.Background(), 1)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println(col)
+	// os.Exit(0)
+
 	c, err := venly.NewClient(venly.VenlyClientConfig{
 		ClientId:     venly.VENLY_CLIENT_ID,
 		ClientSecret: venly.VENLY_APP_SECRET,
@@ -134,6 +141,7 @@ func main() {
 		r.Get("/claim", handlers.ListClaimForUserById)
 		r.Get("/nft", handlers.GetMyNfts)
 		r.Get("/marketplace_listing", handlers.ListMarketplaceListingForUserById)
+		r.Get("/marketplace_offer", handlers.ListMarketplaceOfferForUserById)
 		r.Get("/recipe/identity", handlers.GetAvailableCelebrityRecipes)
 		// r.Get("/recipe/prediction", handlers.GetMyPredictionRecipes)
 		r.Get("/nft_card_identity", handlers.ListNftCardIdentityForUserById)
@@ -212,13 +220,26 @@ func main() {
 	})
 
 	r.Route("/card_collection", func(r chi.Router) {
-		r.Use(handlers.RestrictAuth)
-		r.Use(handlers.RestrictAdmin)
-		r.Get("/", handlers.ListCardCollection)
-		r.Post("/", handlers.CreateNftCollection)
+		r.Group(func(r chi.Router) {
+			r.Get("/", handlers.ListCardCollection)
+		})
+		r.Group(func(r chi.Router) {
+			r.Use(handlers.RestrictAuth)
+			r.Use(handlers.RestrictAdmin)
+			r.Post("/", handlers.CreateNftCollection)
+		})
 		r.Route("/{card_collection_id}", func(r chi.Router) {
-			r.Get("/", handlers.GetCardCollection)
-			r.Put("/", handlers.UpdateCardCollection)
+			r.Group(func(r chi.Router) {
+				r.Use(handlers.RestrictAuth)
+				r.Use(handlers.RestrictAdmin)
+
+				r.Put("/", handlers.UpdateCardCollection)
+				r.Post("/metadata", UploadCollectionMetadata)
+				r.Post("/card_series", handlers.NewCardSeries)
+			})
+			r.Group(func(r chi.Router) {
+				r.Get("/", handlers.GetCardCollection)
+			})
 		})
 	})
 
@@ -232,6 +253,7 @@ func main() {
 
 	r.Route("/webhook", func(r chi.Router) {
 		r.Route("/moonpay", func(r chi.Router) {
+			r.Post("/sign", handlers.MoonpaySignUrl)
 			r.Route("/nft", func(r chi.Router) {
 				r.Get("/asset_info/{contract_address}/{token_id}", handlers.WebhookMoonpayGetNftInfo)
 
