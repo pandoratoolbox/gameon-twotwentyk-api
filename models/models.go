@@ -20,14 +20,17 @@ type ClaimData struct {
 	CreatedAt       *time.Time
 	ClaimerId       *int64
 	NftPredictionId *int64
+	NftTriggerId    *int64
 	ArticleId       *int64
 	Id              *int64
 }
 
 type Claim struct {
 	ClaimData
-	Claimer *User
-	Article *Article
+	Claimer       *User
+	Article       *Article
+	NftPrediction *NftCardPrediction
+	NftTrigger    *NftCardTrigger
 }
 
 type NftCardTriggerData struct {
@@ -199,14 +202,15 @@ type NftCardCrafting struct {
 }
 
 type NftCardPredictionData struct {
-	IsClaimed     *bool
-	Triggers      *Strings
-	Id            *int64
-	CelebrityName *string
-	OwnerId       *int64
-	Rarity        *int64
-	CardSeriesId  *int64
-	CreatedAt     *time.Time
+	IsClaimed       *bool
+	NftCardTriggers *[]NftCardTriggerData
+	Triggers        *Strings
+	Id              *int64
+	CelebrityName   *string
+	OwnerId         *int64
+	Rarity          *int64
+	CardSeriesId    *int64
+	CreatedAt       *time.Time
 }
 
 type NftCardPrediction struct {

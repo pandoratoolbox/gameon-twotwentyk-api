@@ -353,6 +353,8 @@ github.com/pandoratoolbox/json v1.15.7 h1:0+AisgxuF3AkCiPZ1Df7MqgkVd13sctiXEc0JT
 github.com/pandoratoolbox/json v1.15.7/go.mod h1:N/ZXIKJpGU9KFxQdtM7yREGGODW/+LGt6xsbxdpAZd4=
 github.com/pandoratoolbox/json v1.15.8-0.20210802230429-21b1eb964277 h1:yOMYGqE4FdaSqKrxapLZLL1SycTRN0+g58Ed0MRuRFA=
 github.com/pandoratoolbox/json v1.15.8-0.20210802230429-21b1eb964277/go.mod h1:mF7m9kIgyB/zS/5hYxerBrO1jKijS1XPJq8yO2UuDm4=
+github.com/pandoratoolbox/json v1.15.8-0.20231006090331-3befbeb9242f h1:nNaUArAmbUDobXVMn8PCSP+FBnrW7l/89rGV6M4j+9g=
+github.com/pandoratoolbox/json v1.15.8-0.20231006090331-3befbeb9242f/go.mod h1:mF7m9kIgyB/zS/5hYxerBrO1jKijS1XPJq8yO2UuDm4=
 github.com/pelletier/go-toml v1.9.5 h1:4yBQzkHv+7BHq2PQUZF3Mx0IYxG7LsP222s7Agd3ve8=
 github.com/pelletier/go-toml v1.9.5/go.mod h1:u1nR/EPcESfeI/szUZKdtJ0xRNbUoANCkoOuaOx1Y+c=
 github.com/pelletier/go-toml/v2 v2.0.5 h1:ipoSadvV8oGUjnUbMub59IDPPwfxF694nG/jwbMiyQg=

@@ -9,7 +9,7 @@ require (
 	github.com/go-chi/jwtauth v1.2.0
 	github.com/jackc/pgx/v4 v4.18.1
 	github.com/joho/godotenv v1.5.1
-	github.com/pandoratoolbox/json v1.15.8-0.20210802230429-21b1eb964277
+	github.com/pandoratoolbox/json v1.15.8-0.20231006090331-3befbeb9242f
 )
 
 require (

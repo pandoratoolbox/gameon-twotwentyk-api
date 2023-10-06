@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/go-chi/chi"
 	"github.com/pandoratoolbox/json"
 )
@@ -92,7 +93,12 @@ func GetClaim(w http.ResponseWriter, r *http.Request) {
 func NewClaim(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	input := models.Claim{}
+	mid := ctx.Value(models.CTX_user_id).(int64)
+
+	input := struct {
+		NftCardPredictionId int64
+		NftCardTriggerId    int64
+	}{}
 
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&input)
@@ -101,13 +107,67 @@ func NewClaim(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = store.NewClaim(ctx, &input)
+	spew.Dump(input)
+
+	trigger_card, err := store.GetNftCardTrigger(ctx, input.NftCardTriggerId)
 	if err != nil {
 		ServeError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	ServeJSON(w, input)
+	prediction_card, err := store.GetNftCardPrediction(ctx, input.NftCardPredictionId)
+	if err != nil {
+		ServeError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var trigger_in_prediction bool
+	if prediction_card.NftCardTriggers == nil {
+		ServeError(w, "This prediction card has no triggers", http.StatusInternalServerError)
+		return
+	}
+
+	for _, v := range *prediction_card.NftCardTriggers {
+		if *v.Id == input.NftCardTriggerId {
+			trigger_in_prediction = true
+		}
+	}
+
+	if !trigger_in_prediction {
+		ServeError(w, "This trigger card is not in the prediction card", http.StatusInternalServerError)
+		return
+	}
+
+	if *trigger_card.OwnerId != mid {
+		ServeError(w, "You are not the owner of this trigger card", http.StatusInternalServerError)
+		return
+	}
+
+	if *prediction_card.OwnerId != mid {
+		ServeError(w, "You are not the owner of this prediction card", http.StatusInternalServerError)
+		return
+	}
+
+	if prediction_card.IsClaimed != nil && *prediction_card.IsClaimed {
+		ServeError(w, "This prediction card has already been claimed", http.StatusInternalServerError)
+		return
+	}
+
+	new := models.Claim{
+		ClaimData: models.ClaimData{
+			ClaimerId:       &mid,
+			NftPredictionId: &input.NftCardPredictionId,
+			NftTriggerId:    &input.NftCardTriggerId,
+		},
+	}
+
+	err = store.NewClaim(ctx, &new)
+	if err != nil {
+		ServeError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	ServeJSON(w, new)
 }
 
 func UpdateClaim(w http.ResponseWriter, r *http.Request) {

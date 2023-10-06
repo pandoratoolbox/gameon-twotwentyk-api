@@ -209,6 +209,8 @@ func CraftPrediction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	collection_id := nft_card_crafting.CardSeries.CardCollectionId
+
 	if *nft_card_crafting.OwnerId != mid {
 		ServeError(w, "User does not own crafting card", 400)
 		return
@@ -220,8 +222,18 @@ func CraftPrediction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if *nft_card_identity.OwnerId != mid {
+		ServeError(w, "User does not own identity card", 400)
+		return
+	}
+
+	if nft_card_identity.CardSeries.CardCollectionId != collection_id {
+		ServeError(w, "This identity card is not from the same collection", http.StatusInternalServerError)
+		return
+	}
+
 	var triggers []string
-	var nft_card_triggers []models.NftCardTrigger
+	var nft_card_triggers []models.NftCardTriggerData
 	trigger_highest_rarity := int64(0)
 	for _, t := range input.NftCardTriggerIds {
 		nft_card_trigger, err := store.GetNftCardTrigger(ctx, t)
@@ -230,10 +242,15 @@ func CraftPrediction(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		nft_card_triggers = append(nft_card_triggers, nft_card_trigger)
+		nft_card_triggers = append(nft_card_triggers, nft_card_trigger.NftCardTriggerData)
 
 		if *nft_card_trigger.OwnerId != mid {
 			ServeError(w, "User does not own trigger card", 400)
+			return
+		}
+
+		if nft_card_trigger.CardSeries.CardCollectionId != collection_id {
+			ServeError(w, "This trigger card is not from the same collection", http.StatusInternalServerError)
 			return
 		}
 
@@ -254,12 +271,13 @@ func CraftPrediction(w http.ResponseWriter, r *http.Request) {
 
 	out = models.NftCardPrediction{
 		NftCardPredictionData: models.NftCardPredictionData{
-			OwnerId:       &mid,
-			IsClaimed:     &is_claimed,
-			Rarity:        &rarity,
-			Triggers:      &ttriggers,
-			CelebrityName: nft_card_identity.CelebrityName,
-			CardSeriesId:  &card_series_id,
+			OwnerId:         &mid,
+			IsClaimed:       &is_claimed,
+			Rarity:          &rarity,
+			Triggers:        &ttriggers,
+			NftCardTriggers: &nft_card_triggers,
+			CelebrityName:   nft_card_identity.CelebrityName,
+			CardSeriesId:    &card_series_id,
 		},
 	}
 
