@@ -43,6 +43,9 @@ func main() {
 	r.Use(handlers.Authenticator)
 
 	connections.InitPostgres()
+	connections.InitEthereum()
+	connections.CreateCollection()
+
 	graphql.Init()
 
 	store.RefreshCategoryMap(context.Background())

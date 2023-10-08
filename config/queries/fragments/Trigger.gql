@@ -1,0 +1,6 @@
+fragment Trigger on trigger {
+		card_collection_id
+		id
+		name
+		tier
+	}

@@ -1,0 +1,10 @@
+fragment Celebrity on celebrity {
+		id
+		name
+		birth_day
+		birth_month
+		birth_year
+		category
+		eligible_triggers
+		card_collection_id
+	}

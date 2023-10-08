@@ -1,0 +1,7 @@
+#import "./fragments/Category"
+
+query ListCategory {
+		category() {
+			...Category
+		}
+	}
