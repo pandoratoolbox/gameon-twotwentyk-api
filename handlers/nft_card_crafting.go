@@ -115,16 +115,15 @@ func ListNftCardCraftingForUserById(w http.ResponseWriter, r *http.Request) {
 
 	q_rarities := r.URL.Query().Get("rarities")
 	q_status := r.URL.Query().Get("status")
-	q_card_series_id := r.URL.Query().Get("card_series_id")
-
-	if q_card_series_id != "" {
-		i, err := strconv.ParseInt(q_card_series_id, 10, 64)
+	q_card_collection_id := r.URL.Query().Get("card_collection_id")
+	if q_card_collection_id != "" {
+		i, err := strconv.ParseInt(q_card_collection_id, 10, 64)
 		if err != nil {
 			ServeError(w, err.Error(), 500)
 			return
 		}
 
-		filters.CardSeriesId = &i
+		filters.CardCollectionId = &i
 	}
 
 	if q_rarities != "" {

@@ -149,15 +149,15 @@ func ListNftCardCategoryForUserById(w http.ResponseWriter, r *http.Request) {
 		filters.Categories = &categories
 	}
 
-	var card_series_id int64
-	card_series_id_raw := r.URL.Query().Get("card_series_id")
-	if card_series_id_raw != "" {
-		card_series_id, err = strconv.ParseInt(card_series_id_raw, 10, 64)
+	q_card_collection_id := r.URL.Query().Get("card_collection_id")
+	if q_card_collection_id != "" {
+		i, err := strconv.ParseInt(q_card_collection_id, 10, 64)
 		if err != nil {
-			ServeError(w, err.Error(), http.StatusInternalServerError)
+			ServeError(w, err.Error(), 500)
 			return
 		}
-		filters.CardSeriesId = &card_series_id
+
+		filters.CardCollectionId = &i
 	}
 
 	var rarities models.Ints

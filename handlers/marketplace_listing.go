@@ -258,7 +258,7 @@ func SearchMarketplaceListings(w http.ResponseWriter, r *http.Request) {
 
 	nft_type_ids_q := r.URL.Query().Get("nft_type_ids")
 
-	nft_collection_id, err := strconv.ParseInt(r.URL.Query().Get("nft_collection_id"), 10, 64)
+	nft_collection_id, err := strconv.ParseInt(r.URL.Query().Get("card_collection_id"), 10, 64)
 	if err != nil {
 		ServeError(w, err.Error(), http.StatusInternalServerError)
 		return

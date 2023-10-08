@@ -126,17 +126,16 @@ func ListNftCardDayMonthForUserById(w http.ResponseWriter, r *http.Request) {
 
 	filters := models.NftCardDayMonthFilter{}
 
-	q_card_series_id := r.URL.Query().Get("card_series_id")
-	if q_card_series_id != "" {
-		i, err := strconv.ParseInt(q_card_series_id, 10, 64)
+	q_card_collection_id := r.URL.Query().Get("card_collection_id")
+	if q_card_collection_id != "" {
+		i, err := strconv.ParseInt(q_card_collection_id, 10, 64)
 		if err != nil {
-			ServeError(w, err.Error(), http.StatusBadRequest)
+			ServeError(w, err.Error(), 500)
 			return
 		}
 
-		filters.CardSeriesId = &i
+		filters.CardCollectionId = &i
 	}
-
 	q_day := r.URL.Query().Get("day")
 	if q_day != "" {
 		i, err := strconv.ParseInt(q_day, 10, 64)

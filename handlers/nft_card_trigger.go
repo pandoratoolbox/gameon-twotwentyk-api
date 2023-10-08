@@ -132,15 +132,15 @@ func ListNftCardTriggerForUserById(w http.ResponseWriter, r *http.Request) {
 
 	filters := models.NftCardTriggerFilter{}
 
-	q_card_series_id := r.URL.Query().Get("card_series_id")
-	if q_card_series_id != "" {
-		i, err := strconv.ParseInt(q_card_series_id, 10, 64)
+	q_card_collection_id := r.URL.Query().Get("card_collection_id")
+	if q_card_collection_id != "" {
+		i, err := strconv.ParseInt(q_card_collection_id, 10, 64)
 		if err != nil {
 			ServeError(w, err.Error(), 500)
 			return
 		}
 
-		filters.CardSeriesId = &i
+		filters.CardCollectionId = &i
 	}
 
 	q_triggers := r.URL.Query().Get("triggers")

@@ -151,6 +151,11 @@ func GetNftCardCrafting(ctx context.Context, id int64) (models.NftCardCrafting, 
 			query GetNftCardCrafting {
 			nft_card_crafting(where: { id: { eq: $id } }) {
 				...NftCardCrafting
+				card_series {
+					id
+					name
+					card_collection_id
+				}
 			}
 		}
 		`
@@ -199,9 +204,9 @@ func ListNftCardCraftingByOwnerId(ctx context.Context, id int64, filters models.
 				}`
 
 	input := struct {
-		Id           int64   `json:"id"`
-		Rarities     []int64 `json:"rarities"`
-		CardSeriesId int64   `json:"card_series_id"`
+		Id               int64   `json:"id"`
+		Rarities         []int64 `json:"rarities"`
+		CardCollectionId int64   `json:"card_collection_id"`
 	}{
 		Id: id,
 	}
@@ -211,9 +216,9 @@ func ListNftCardCraftingByOwnerId(ctx context.Context, id int64, filters models.
 
 	filter_params = append(filter_params, "owner_id: { eq: $id }")
 
-	if filters.CardSeriesId != nil {
-		filter_params = append(filter_params, "card_series_id: { eq: $card_series_id}")
-		input.CardSeriesId = *filters.CardSeriesId
+	if filters.CardCollectionId != nil {
+		input.CardCollectionId = *filters.CardCollectionId
+		filter_params = append(filter_params, "card_series: { card_collection_id: $card_collection_id }")
 	}
 
 	if filters.Rarities != nil {

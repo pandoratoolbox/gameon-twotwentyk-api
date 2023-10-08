@@ -151,6 +151,11 @@ func GetNftCardIdentity(ctx context.Context, id int64) (models.NftCardIdentity, 
 			query GetNftCardIdentity {
 			nft_card_identity(where: { id: { eq: $id } }) {
 				...NftCardIdentity
+				card_series {
+					id
+					name
+					card_collection_id
+				}
 			}
 		}
 		`
@@ -199,11 +204,11 @@ func ListNftCardIdentityByOwnerId(ctx context.Context, id int64, filters models.
 	}`
 
 	input := struct {
-		Id           int64    `json:"id"`
-		Rarities     []int64  `json:"rarities"`
-		Categories   []string `json:"categories"`
-		Celebrities  []string `json:"celebrities"`
-		CardSeriesId int64    `json:"card_series_id"`
+		Id               int64    `json:"id"`
+		Rarities         []int64  `json:"rarities"`
+		Categories       []string `json:"categories"`
+		Celebrities      []string `json:"celebrities"`
+		CardCollectionId int64    `json:"card_collection_id"`
 	}{
 		Id: id,
 	}
@@ -223,9 +228,9 @@ func ListNftCardIdentityByOwnerId(ctx context.Context, id int64, filters models.
 		filter_params = append(filter_params, "celebrity_name: { in: $celebrities }")
 	}
 
-	if filters.CardSeriesId != nil {
-		input.CardSeriesId = *filters.CardSeriesId
-		filter_params = append(filter_params, "card_series_id: { eq: $card_series_id }")
+	if filters.CardCollectionId != nil {
+		input.CardCollectionId = *filters.CardCollectionId
+		filter_params = append(filter_params, "card_series: { card_collection_id: $card_collection_id }")
 	}
 
 	if filters.Rarities != nil {

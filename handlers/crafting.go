@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"gameon-twotwentyk-api/models"
 	"gameon-twotwentyk-api/store"
 	"net/http"
@@ -56,6 +57,45 @@ func CraftIdentity(w http.ResponseWriter, r *http.Request) {
 	nft_card_category, err := store.GetNftCardCategory(ctx, input.NftCardCategoryId)
 	if err != nil {
 		ServeError(w, "nft_card_category: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	collection_id := *nft_card_crafting.CardSeries.CardCollectionId
+
+	fmt.Println("crafting collection id: ", collection_id)
+
+	if *nft_card_crafting.OwnerId != mid {
+		ServeError(w, "User does not own crafting card", 400)
+		return
+	}
+
+	if *nft_card_year.OwnerId != mid {
+		ServeError(w, "User does not own year card", 400)
+		return
+	}
+
+	if *nft_card_year.CardSeries.CardCollectionId != collection_id {
+		ServeError(w, "This year card is not from the same collection", http.StatusInternalServerError)
+		return
+	}
+
+	if *nft_card_day_month.OwnerId != mid {
+		ServeError(w, "User does not own day_month card", 400)
+		return
+	}
+
+	if *nft_card_day_month.CardSeries.CardCollectionId != collection_id {
+		ServeError(w, "This day_month card is not from the same collection", http.StatusInternalServerError)
+		return
+	}
+
+	if *nft_card_category.OwnerId != mid {
+		ServeError(w, "User does not own category card", 400)
+		return
+	}
+
+	if *nft_card_category.CardSeries.CardCollectionId != collection_id {
+		ServeError(w, "This category card is not from the same collection", http.StatusInternalServerError)
 		return
 	}
 
@@ -209,7 +249,9 @@ func CraftPrediction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	collection_id := nft_card_crafting.CardSeries.CardCollectionId
+	collection_id := *nft_card_crafting.CardSeries.CardCollectionId
+
+	fmt.Println("crafting collection id: ", collection_id)
 
 	if *nft_card_crafting.OwnerId != mid {
 		ServeError(w, "User does not own crafting card", 400)
@@ -222,12 +264,14 @@ func CraftPrediction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println("identity collection id: ", *nft_card_identity.CardSeries.CardCollectionId)
+
 	if *nft_card_identity.OwnerId != mid {
 		ServeError(w, "User does not own identity card", 400)
 		return
 	}
 
-	if nft_card_identity.CardSeries.CardCollectionId != collection_id {
+	if *nft_card_identity.CardSeries.CardCollectionId != collection_id {
 		ServeError(w, "This identity card is not from the same collection", http.StatusInternalServerError)
 		return
 	}
@@ -249,7 +293,7 @@ func CraftPrediction(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if nft_card_trigger.CardSeries.CardCollectionId != collection_id {
+		if *nft_card_trigger.CardSeries.CardCollectionId != collection_id {
 			ServeError(w, "This trigger card is not from the same collection", http.StatusInternalServerError)
 			return
 		}

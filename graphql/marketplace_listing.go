@@ -319,9 +319,9 @@ func SearchMarketplaceListings(ctx context.Context, q string, card_collection_id
 		Id    int64
 		Cid   int64
 	}{
-		Limit: limit,
-		Nids:  nft_type_ids,
-		Cid:   card_collection_id,
+		// Limit: limit,
+		Nids: nft_type_ids,
+		Cid:  card_collection_id,
 	}
 
 	if listing_id != 0 {
@@ -339,13 +339,18 @@ func SearchMarketplaceListings(ctx context.Context, q string, card_collection_id
 		}`
 	}
 
+	if limit != 0 {
+		filters += ", limit: $limit"
+		input.Limit = limit
+	}
+
 	js, err := json.Marshal(input)
 	if err != nil {
 		return out, err
 	}
 
 	gq := fragments + fmt.Sprintf(`query SearchMarketplaceListings {
-		marketplace_listing(%s, limit: $limit) {
+		marketplace_listing(%s) {
 						...MarketplaceListing
 						%s
 					}

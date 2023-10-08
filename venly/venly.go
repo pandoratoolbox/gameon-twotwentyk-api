@@ -15,8 +15,8 @@ import (
 const (
 	VENLY_API_URL    = "https://api-wallet-sandbox.venly.io"
 	VENLY_AUTH_URL   = "https://login-sandbox.venly.io"
-	VENLY_CLIENT_ID  = "3e572e5a-8c4d-466f-a674-02a030f9aa57"
-	VENLY_APP_SECRET = "2971ea69-564e-4c71-833d-f29d9217495b"
+	VENLY_CLIENT_ID  = "TwoTwentyK-capsule"
+	VENLY_APP_SECRET = "92b7e1eb-f860-4627-943c-520a3623b89d"
 )
 
 var Global *VenlyClient

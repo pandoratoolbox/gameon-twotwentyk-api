@@ -152,6 +152,7 @@ func main() {
 		r.Get("/nft_card_year", handlers.ListNftCardYearForUserById)
 		r.Get("/nft_card_crafting", handlers.ListNftCardCraftingForUserById)
 		r.Get("/card_pack", handlers.ListCardPackForUserById)
+		r.Post("/verify_password", handlers.VerifyPassword)
 	})
 
 	r.Route("/auth", func(r chi.Router) {

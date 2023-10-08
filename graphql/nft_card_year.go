@@ -151,6 +151,11 @@ func GetNftCardYear(ctx context.Context, id int64) (models.NftCardYear, error) {
 			query GetNftCardYear {
 			nft_card_year(where: { id: { eq: $id } }) {
 				...NftCardYear
+				card_series {
+					id
+					name
+					card_collection_id
+				}
 			}
 		}
 		`
@@ -199,10 +204,10 @@ func ListNftCardYearByOwnerId(ctx context.Context, id int64, filters models.NftC
 	}`
 
 	input := struct {
-		Id           int64   `json:"id"`
-		Year         int64   `json:"year"`
-		Rarities     []int64 `json:"rarities"`
-		CardSeriesId int64   `json:"card_series_id"`
+		Id               int64   `json:"id"`
+		Year             int64   `json:"year"`
+		Rarities         []int64 `json:"rarities"`
+		CardCollectionId int64   `json:"card_collection_id"`
 	}{
 		Id: id,
 	}
@@ -217,9 +222,9 @@ func ListNftCardYearByOwnerId(ctx context.Context, id int64, filters models.NftC
 		filter_params = append(filter_params, "year: { eq: $year }")
 	}
 
-	if filters.CardSeriesId != nil {
-		input.CardSeriesId = *filters.CardSeriesId
-		filter_params = append(filter_params, "card_series_id: { eq: $card_series_id }")
+	if filters.CardCollectionId != nil {
+		input.CardCollectionId = *filters.CardCollectionId
+		filter_params = append(filter_params, "card_series: { card_collection_id: $card_collection_id }")
 	}
 
 	if filters.Rarities != nil {

@@ -3,8 +3,10 @@ package graphql
 import (
 	"context"
 	"errors"
+	"fmt"
 	"gameon-twotwentyk-api/models"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/pandoratoolbox/json"
 )
 
@@ -31,6 +33,10 @@ func NewClaim(ctx context.Context, data *models.Claim) error {
 	if err != nil {
 		return err
 	}
+
+	spew.Dump(data)
+
+	fmt.Println(string(js))
 
 	res, err := Graph.GraphQL(ctx, q, js, nil)
 	if err != nil {
