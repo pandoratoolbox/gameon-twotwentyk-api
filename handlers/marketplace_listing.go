@@ -201,14 +201,23 @@ func NewMarketplaceListing(w http.ResponseWriter, r *http.Request) {
 func UpdateMarketplaceListing(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
+	q := chi.URLParam(r, "marketplace_listing_id")
+	id, err := strconv.ParseInt(q, 10, 64)
+	if err != nil {
+		ServeError(w, err.Error(), 500)
+		return
+	}
+
 	data := models.MarketplaceListing{}
 
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&data)
+	err = decoder.Decode(&data)
 	if err != nil {
 		ServeError(w, err.Error(), 400)
 		return
 	}
+
+	data.Id = &id
 
 	err = store.UpdateMarketplaceListing(ctx, data)
 	if err != nil {
@@ -257,6 +266,13 @@ func SearchMarketplaceListings(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
 
 	nft_type_ids_q := r.URL.Query().Get("nft_type_ids")
+
+	// is_listed_q := r.URL.Query().Get("is_listed")
+	// is_listed, err := strconv.ParseBool(is_listed_q)
+	// if err != nil {
+	// 	ServeError(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
 
 	nft_collection_id, err := strconv.ParseInt(r.URL.Query().Get("card_collection_id"), 10, 64)
 	if err != nil {

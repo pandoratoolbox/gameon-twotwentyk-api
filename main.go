@@ -173,11 +173,11 @@ func main() {
 	r.Route("/nft", func(r chi.Router) {
 		r.Post("/identity", handlers.CraftIdentity)
 		r.Post("/prediction", handlers.CraftPrediction)
-		r.Post("/trigger", handlers.NewNftCardTrigger)
-		r.Post("/day_month", handlers.NewNftCardDayMonth)
-		r.Post("/crafting", handlers.NewNftCardCrafting)
-		r.Post("/category", handlers.NewNftCardCategory)
-		r.Post("/year", handlers.NewNftCardYear)
+		// r.Post("/trigger", handlers.NewNftCardTrigger)
+		// r.Post("/day_month", handlers.NewNftCardDayMonth)
+		// r.Post("/crafting", handlers.NewNftCardCrafting)
+		// r.Post("/category", handlers.NewNftCardCategory)
+		// r.Post("/year", handlers.NewNftCardYear)
 
 		// r.Post("/recipe/prediction", handlers.GenerateNFTsForRecipePrediction)
 

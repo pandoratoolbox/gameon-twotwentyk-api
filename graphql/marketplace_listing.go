@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"gameon-twotwentyk-api/models"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/pandoratoolbox/json"
 )
 
@@ -117,6 +118,8 @@ func UpdateMarketplaceListing(ctx context.Context, data models.MarketplaceListin
 
 	data.Id = nil
 	input.Data = data
+
+	spew.Dump(data)
 
 	js, err := json.Marshal(input)
 	if err != nil {
@@ -243,6 +246,9 @@ func SearchMarketplaceListings(ctx context.Context, q string, card_collection_id
 	for _, v := range nft_type_ids {
 		switch v {
 		case models.NFT_TYPE_ID_CARD_PACK:
+			//tiers
+			//collections
+			//status
 			fragments += `
 		
 		` + fragment_card_pack
@@ -251,6 +257,8 @@ func SearchMarketplaceListings(ctx context.Context, q string, card_collection_id
 			...CardPack
 		}`
 		case models.NFT_TYPE_ID_CATEGORY:
+			//collections
+			//status
 			fragments += `
 		
 		` + fragment_nft_card_category
@@ -259,6 +267,8 @@ func SearchMarketplaceListings(ctx context.Context, q string, card_collection_id
 			...NftCardCategory
 		}`
 		case models.NFT_TYPE_ID_CRAFTING:
+			//collections
+			//status
 			fragments += `
 		
 		` + fragment_nft_card_crafting
@@ -267,6 +277,11 @@ func SearchMarketplaceListings(ctx context.Context, q string, card_collection_id
 			...NftCardCrafting
 		}`
 		case models.NFT_TYPE_ID_PREDICTION:
+			//trigger tier
+			//eligible categories
+			//collections
+			//rarities
+			//status
 			fragments += `
 		` + fragment_nft_card_prediction
 			q_nft += `
@@ -275,6 +290,10 @@ func SearchMarketplaceListings(ctx context.Context, q string, card_collection_id
 			...NftCardPrediction
 		}`
 		case models.NFT_TYPE_ID_IDENTITY:
+			//categories
+			//collections
+			//rarities
+			//status
 			fragments += `
 		
 		` + fragment_nft_card_identity
@@ -284,6 +303,8 @@ func SearchMarketplaceListings(ctx context.Context, q string, card_collection_id
 			...NftCardIdentity
 		}`
 		case models.NFT_TYPE_ID_DAY_MONTH:
+			//collections
+			//status
 			fragments += `
 		
 		` + fragment_nft_card_day_month
@@ -293,6 +314,8 @@ func SearchMarketplaceListings(ctx context.Context, q string, card_collection_id
 			...NftCardDayMonth
 		}`
 		case models.NFT_TYPE_ID_TRIGGER:
+			//collections
+			//status
 			fragments += `
 		
 		` + fragment_nft_card_trigger
@@ -302,6 +325,8 @@ func SearchMarketplaceListings(ctx context.Context, q string, card_collection_id
 			...NftCardTrigger
 		}`
 		case models.NFT_TYPE_ID_YEAR:
+			//collections
+			//status
 			fragments += `
 		
 		` + fragment_nft_card_year
@@ -314,10 +339,11 @@ func SearchMarketplaceListings(ctx context.Context, q string, card_collection_id
 	}
 
 	input := struct {
-		Limit int
-		Nids  []int64
-		Id    int64
-		Cid   int64
+		Limit    int
+		Nids     []int64
+		Id       int64
+		Cid      int64
+		Rarities models.Ints
 	}{
 		// Limit: limit,
 		Nids: nft_type_ids,

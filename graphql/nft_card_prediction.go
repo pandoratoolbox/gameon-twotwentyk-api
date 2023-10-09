@@ -147,7 +147,7 @@ func UpdateNftCardPrediction(ctx context.Context, data models.NftCardPrediction)
 func GetNftCardPrediction(ctx context.Context, id int64) (models.NftCardPrediction, error) {
 	var data models.NftCardPrediction
 
-	q := fragment_nft_card_prediction + `
+	q := fragment_nft_card_prediction + fragment_nft_card_trigger + fragment_nft_card_identity + `
 			query GetNftCardPrediction {
 			nft_card_prediction(where: { id: { eq: $id } }) {
 				...NftCardPrediction

@@ -204,6 +204,7 @@ type NftCardCrafting struct {
 type NftCardPredictionData struct {
 	IsClaimed       *bool
 	NftCardTriggers *[]NftCardTriggerData
+	NftIdentity     *NftCardIdentityData `json:"nft_identity"`
 	Triggers        *Strings
 	Id              *int64
 	CelebrityName   *string

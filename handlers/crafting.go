@@ -322,6 +322,7 @@ func CraftPrediction(w http.ResponseWriter, r *http.Request) {
 			NftCardTriggers: &nft_card_triggers,
 			CelebrityName:   nft_card_identity.CelebrityName,
 			CardSeriesId:    &card_series_id,
+			NftIdentity:     &nft_card_identity.NftCardIdentityData,
 		},
 	}
 
