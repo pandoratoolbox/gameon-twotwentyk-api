@@ -3,8 +3,10 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"gameon-twotwentyk-api/emails"
 	"gameon-twotwentyk-api/models"
 	"gameon-twotwentyk-api/store"
+	"math/rand"
 	"net/http"
 
 	"github.com/go-chi/jwtauth"
@@ -84,6 +86,10 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	w.Write(js)
 }
 
+func ResetPassword(w http.ResponseWriter, r *http.Request) {
+	emails.SendResetEmail("admin@pandoratoolbox.com")
+}
+
 func Register(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -126,6 +132,25 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		ServeError(w, err.Error(), 400)
 		return
 	}
+
+	code := fmt.Sprintf("%06d",  rand.Intn(999999 - 100000 + 1) + 100000)
+	method := "Email"
+
+	verification := models.Verification{
+		VerificationData: models.VerificationData{
+			UserId:            	user.Id,
+			Code: 				&code,
+			Method: 			&method,
+		},
+	}
+
+	err = store.NewVerification(ctx, &verification)
+	if err != nil {
+		ServeError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	emails.SendVerifyEmail("admin@pandoratoolbox.com", &verification, &user)
 
 	response := struct {
 		User  models.User
