@@ -99,6 +99,18 @@ type NftCardYear struct {
 	CardSeries         *CardSeries
 }
 
+type VerificationData struct {
+	Id             *int64
+	UserId         *int64
+	CreatedAt      *time.Time
+	Code	       *string
+	Method    	   *string
+}
+
+type Verification struct{
+	VerificationData
+}
+
 type UserData struct {
 	Username       *string
 	CreatedAt      *time.Time
@@ -112,6 +124,8 @@ type UserData struct {
 	VenlyId        *string
 	Email          *string
 	PhoneNumber    *string
+	VerifiedPhone  *bool
+	VerifiedEmail  *bool
 }
 
 type User struct {
