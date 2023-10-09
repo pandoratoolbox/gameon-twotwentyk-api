@@ -1,8 +1,11 @@
 package handlers
 
 import (
+	"fmt"
 	"gameon-twotwentyk-api/models"
 	"gameon-twotwentyk-api/store"
+	"gameon-twotwentyk-api/twilio"
+	"math/rand"
 	"net/http"
 	"strconv"
 
@@ -56,7 +59,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	mid := ctx.Value(models.CTX_user_id).(int64)
 
 	input := struct {
-		PhoneNumber string `json:"phone_number"`
+		PhoneNumber string `json:"phonenumber"`
 		Username    string `json:"username"`
 		Name        string `json:"name"`
 		Password    string `json:"password"`
@@ -73,6 +76,32 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	if input.PhoneNumber != "" {
 		data.PhoneNumber = &input.PhoneNumber
+		
+		user, err := store.GetUser(r.Context(), mid)
+		if err != nil {
+			ServeError(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		code := fmt.Sprintf("%06d",  rand.Intn(999999 - 100000 + 1) + 100000)
+		method := "Phone"
+
+		verification := models.Verification{
+			VerificationData: models.VerificationData{
+				UserId:            	user.Id,
+				Code: 				&code,
+				Method: 			&method,
+			},
+		}
+
+		err = store.NewVerification(ctx, &verification)
+		if err != nil {
+			ServeError(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		body := fmt.Sprintf("Here's your TwoTwentyK Verification Code: %s", code)
+		twilio.SendSMS(*data.PhoneNumber, body)
 	}
 
 	if input.Name != "" {
