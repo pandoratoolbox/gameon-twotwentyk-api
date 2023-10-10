@@ -7,6 +7,7 @@ import (
 	"gameon-twotwentyk-api/handlers"
 	"gameon-twotwentyk-api/store"
 	"gameon-twotwentyk-api/venly"
+	"gameon-twotwentyk-api/wsserver"
 	"log"
 	"net/http"
 
@@ -67,6 +68,8 @@ func main() {
 
 	venly.Global = c
 
+	r.Get("/ws", wsserver.Manager.HandleConnection)
+	
 	r.Get("/nft_card_day_month/{nft_card_day_month_id}", handlers.GetNftCardDayMonth)
 
 	r.Route("/trigger", func(r chi.Router) {
@@ -272,9 +275,9 @@ func main() {
 		})
 	})
 
-	r.Route("/ws", func(r chi.Router) {
-		// r.Connect("/", handlers.WebsocketUpgrade)
-	})
+	// r.Route("/ws", func(r chi.Router) {
+	// 	// r.Connect("/", handlers.WebsocketUpgrade)
+	// })
 
 	err = http.ListenAndServe(":3333", r)
 	if err != nil {

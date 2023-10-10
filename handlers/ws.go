@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"gameon-twotwentyk-api/models"
-	"gameon-twotwentyk-api/wsserver"
 	"net/http"
 
 	"github.com/gobwas/ws"
@@ -10,7 +8,7 @@ import (
 )
 
 func WebsocketUpgrade(r *http.Request, w http.ResponseWriter) {
-	mid := r.Context().Value(models.CTX_user_id).(int64)
+	// mid := r.Context().Value(models.CTX_user_id).(int64)
 	conn, _, _, err := ws.UpgradeHTTP(r, w)
 	if err != nil {
 		// handle error
@@ -30,9 +28,9 @@ func WebsocketUpgrade(r *http.Request, w http.ResponseWriter) {
 		}
 	}()
 
-	wsserver.Global.Clients[mid] = &wsserver.Client{
-		UserId:   mid,
-		Platform: "web",
-		// conn:     conn,
-	}
+	// wsserver.Global.Clients[mid] = &wsserver.Client{
+	// 	UserId:   mid,
+	// 	Platform: "web",
+	// 	// conn:     conn,
+	// }
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"gameon-twotwentyk-api/graphql"
 	"gameon-twotwentyk-api/models"
+	"gameon-twotwentyk-api/wsserver"
 )
 
 func NewClaim(ctx context.Context, data *models.Claim) error {
@@ -35,6 +36,10 @@ func DeleteClaim(ctx context.Context, id int64) error {
 }
 
 func UpdateClaim(ctx context.Context, data models.Claim) error {
+	client := wsserver.Manager.ClientById[*data.ClaimerId]
+
+	wsserver.Manager.Write(client, *data.ClaimerId, *data.Status)
+	
 	err := graphql.UpdateClaim(ctx, data)
 	if err != nil {
 		return err
