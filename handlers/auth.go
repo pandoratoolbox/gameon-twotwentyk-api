@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"gameon-twotwentyk-api/models"
 	"gameon-twotwentyk-api/store"
 	"gameon-twotwentyk-api/venly"
@@ -201,7 +202,7 @@ func AuthGoogle(w http.ResponseWriter, r *http.Request) {
 func registerNewUser(ctx context.Context, user *models.User) error {
 	err := store.NewUser(ctx, user)
 	if err != nil {
-		return err
+		return errors.New("Username or email already exists")
 	}
 
 	wallet, err := venly.Global.CreateWallet(venly.VenlyRequestCreateWallet{
