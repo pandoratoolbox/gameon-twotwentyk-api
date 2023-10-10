@@ -153,6 +153,10 @@ func main() {
 		r.Get("/nft_card_crafting", handlers.ListNftCardCraftingForUserById)
 		r.Get("/card_pack", handlers.ListCardPackForUserById)
 		r.Post("/verify_password", handlers.VerifyPassword)
+		
+		r.Post("/verify_email", handlers.VerifyEmail)
+		r.Post("/verify_phonenumber", handlers.VerifyPhoneNumber)
+		r.Post("/verify_email_link/{token}", handlers.VerifyEmailByLink)
 	})
 
 	r.Route("/auth", func(r chi.Router) {
@@ -160,6 +164,8 @@ func main() {
 		r.Post("/register", handlers.Register)
 		r.Post("/google", handlers.AuthGoogle)
 		r.Post("/apple", handlers.AuthApple)
+		
+		r.Post("/reset_password", handlers.ResetPassword)
 	})
 
 	r.Route("/feed", func(r chi.Router) {
@@ -235,7 +241,7 @@ func main() {
 				r.Use(handlers.RestrictAdmin)
 
 				r.Put("/", handlers.UpdateCardCollection)
-				r.Post("/metadata", UploadCollectionMetadata)
+				// r.Post("/metadata", UploadCollectionMetadata)
 				r.Post("/card_series", handlers.NewCardSeries)
 			})
 			r.Group(func(r chi.Router) {

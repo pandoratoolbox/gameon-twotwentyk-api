@@ -1,11 +1,17 @@
 package emails
 
 import (
+	"context"
+	"fmt"
+	"gameon-twotwentyk-api/models"
+	"time"
+
+	"github.com/dgrijalva/jwt-go"
 	"github.com/mrz1836/postmark"
 )
 
 const (
-	EMAIL_ADDRESS_NOREPLY           = "pandoratoolbox@gmail.com"
+	EMAIL_ADDRESS_NOREPLY           = "admin@pandoratoolbox.com"
 	POSTMARK_API_TOKEN              = "74d5dba3-e53e-4ef0-86e0-5249d6eb8a99"
 	POSTMARK_ACCOUNT_TOKEN          = "a04c0dc0-e985-42c0-af71-f07e7653cfb1"
 	TEMPLATE_ID_CREATE_USER         = 1
@@ -16,7 +22,7 @@ const (
 
 var Postmark *postmark.Client
 
-func Init() error {
+func init() {
 
 	// auth := &http.Client{
 	// 	Transport: &postmark.AuthTransport{
@@ -24,9 +30,104 @@ func Init() error {
 	// 	},
 	// }
 
-	Postmark = postmark.NewClient(Postmark.ServerToken, Postmark.AccountToken)
+	Postmark = postmark.NewClient(POSTMARK_API_TOKEN, POSTMARK_ACCOUNT_TOKEN)
+}
 
-	return nil
+type CustomClaims struct {
+	Id int64 `json:"id"`
+	UserId int64 `json:"userid"`
+	jwt.StandardClaims
+}
+
+type ResetPasswordClaims struct {
+	Email string `json:"email"`
+	jwt.StandardClaims
+}
+
+func generateToken(verification *models.Verification) (string, error) {
+	claims := CustomClaims{
+		Id: *verification.Id,
+		UserId: *verification.UserId,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour).Unix(), // Token expiration time
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signedToken, err := token.SignedString([]byte("h1l32b"))
+	if err != nil {
+		return "", err
+	}
+
+	return signedToken, nil
+}
+
+func SendResetEmail(to string, verification *models.Verification, user *models.User) error {
+	claims := ResetPasswordClaims{
+		Email: to,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Hour).Unix(), // Token expiration time
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signedToken, err := token.SignedString([]byte("h1l32b"))
+
+	if err != nil {
+		return err
+	}
+	
+	email := postmark.Email{
+		From:       EMAIL_ADDRESS_NOREPLY,
+		To:         to,
+		Subject:    "Reset Password",
+		HTMLBody:   fmt.Sprintf(`<div>Hi, %s, 
+
+		Click Button to reset password
+
+		<button><a href="http://%s">Confirm Email Address</a></button>
+		</div>`, *user.Username, signedToken),
+	}
+
+	fmt.Println(signedToken)
+
+	_, err = Postmark.SendEmail(context.Background(), email)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return err;
+}
+
+func SendVerifyEmail(to string, verification *models.Verification, user *models.User) error {
+	token, _ := generateToken(verification);
+	
+	email := postmark.Email{
+		From:       EMAIL_ADDRESS_NOREPLY,
+		To:         to,
+		Subject:    "Verify Your Email",
+		HTMLBody:   fmt.Sprintf(`<div>Hi, %s, 
+
+		There’s one quick step you need to complete before creating your account. Please enter this verification code to confirm this is your email. 
+		
+		%s 
+		
+		Verification codes expire after 30 minutes. 
+
+		<button><a href="http://%s">Confirm Email Address</a></button>
+		</div>`, *user.Username, *verification.Code, token),
+	}
+
+	fmt.Println(token)
+
+	_, err := Postmark.SendEmail(context.Background(), email)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return err;
 }
 
 // func SendTemplate(from string, to string, template_id int, template_model map[string]interface{}) error {
