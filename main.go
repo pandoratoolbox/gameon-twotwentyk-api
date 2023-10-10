@@ -68,8 +68,10 @@ func main() {
 
 	venly.Global = c
 
+	// wsserver.Manager = wsserver.NewClientManager()
+
 	r.Get("/ws", wsserver.Manager.HandleConnection)
-	
+
 	r.Get("/nft_card_day_month/{nft_card_day_month_id}", handlers.GetNftCardDayMonth)
 
 	r.Route("/trigger", func(r chi.Router) {
@@ -156,7 +158,7 @@ func main() {
 		r.Get("/nft_card_crafting", handlers.ListNftCardCraftingForUserById)
 		r.Get("/card_pack", handlers.ListCardPackForUserById)
 		r.Post("/verify_password", handlers.VerifyPassword)
-		
+
 		r.Post("/verify_email", handlers.VerifyEmail)
 		r.Post("/verify_phonenumber", handlers.VerifyPhoneNumber)
 		r.Post("/verify_email_link/{token}", handlers.VerifyEmailByLink)
@@ -167,7 +169,7 @@ func main() {
 		r.Post("/register", handlers.Register)
 		r.Post("/google", handlers.AuthGoogle)
 		r.Post("/apple", handlers.AuthApple)
-		
+
 		r.Post("/reset_password", handlers.ResetPassword)
 	})
 

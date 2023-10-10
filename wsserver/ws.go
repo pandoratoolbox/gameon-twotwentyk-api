@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/pandoratoolbox/json"
+
 	"github.com/go-chi/jwtauth"
 	"github.com/gorilla/websocket"
 )
@@ -15,10 +17,15 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+type MessagePayload struct {
+	Type    string      `json:"type"`
+	Payload interface{} `json:"payload"`
+}
+
 // Client represents a connected client
 type Client struct {
-	conn        *websocket.Conn
-	userId 		int64
+	conn   *websocket.Conn
+	userId int64
 }
 
 // ClientManager manages the connected clients
@@ -51,7 +58,7 @@ func (manager *ClientManager) Start() {
 			if _, ok := manager.clients[client]; ok {
 				delete(manager.clients, client)
 				delete(manager.ClientById, client.userId)
-				client.conn.Close();
+				client.conn.Close()
 				fmt.Println("Client Disconnected:", client.conn.RemoteAddr(), "Token:", client.userId)
 			}
 		}
@@ -85,7 +92,7 @@ func (manager *ClientManager) HandleConnection(w http.ResponseWriter, r *http.Re
 
 	userId := token.PrivateClaims()["id"]
 
-	client := &Client{conn: conn, userId: userId.(int64)}
+	client := &Client{conn: conn, userId: int64(userId.(float64))}
 	manager.register <- client
 
 	go manager.Read(client)
@@ -107,11 +114,25 @@ func (manager *ClientManager) Read(client *Client) {
 	}
 }
 
-func (manager *ClientManager) Write(client *Client, userid int64, status int64 ) {
-	client.conn.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("%d", status)))
+func (manager *ClientManager) Write(client *Client, userid int64, msg MessagePayload) error {
+	js, err := json.Marshal(msg)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	err = client.conn.WriteMessage(websocket.TextMessage, js)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	fmt.Println("Message sent to client:", userid)
+
+	return nil
 }
 
-func init(){
+func init() {
 	Manager = NewClientManager()
 	go Manager.Start()
 }
