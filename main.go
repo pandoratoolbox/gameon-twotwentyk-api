@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"gameon-twotwentyk-api/connections"
+	"gameon-twotwentyk-api/feed"
 	"gameon-twotwentyk-api/graphql"
 	"gameon-twotwentyk-api/handlers"
 	"gameon-twotwentyk-api/store"
@@ -66,6 +67,31 @@ func main() {
 	}
 
 	venly.Global = c
+
+	feed.Init()
+
+	// celebrities, err := store.ListCelebrity(context.Background())
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// var names []string
+	// for _, v := range celebrities {
+	// 	names = append(names, *v.Name)
+	// }
+
+	// news, err := feed.GetPersonalisedFeed(names)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// for _, v := range news {
+	// 	if v.IdentifiedText != nil {
+	// 		spew.Dump(v)
+	// 	}
+	// }
+
+	// os.Exit(0)
 
 	r.Get("/nft_card_day_month/{nft_card_day_month_id}", handlers.GetNftCardDayMonth)
 
@@ -164,7 +190,7 @@ func main() {
 
 	r.Route("/feed", func(r chi.Router) {
 		r.Get("/", handlers.SearchArticles)
-		r.Get("/personalised", handlers.GetArticlesPersonalised)
+		r.Get("/personalised", handlers.SearchArticles)
 	})
 
 	// blockchain

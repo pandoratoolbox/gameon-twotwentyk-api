@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/Timothylock/go-signin-with-apple/apple"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/pandoratoolbox/json"
 
 	"google.golang.org/api/idtoken"
@@ -41,9 +42,11 @@ func AuthApple(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	spew.Dump(claims)
+
 	r_email, ok := claims.Get("email")
 	if !ok {
-		ServeError(w, "Error getting email from google id token claims", http.StatusInternalServerError)
+		ServeError(w, "Error getting email from apple id token claims", http.StatusInternalServerError)
 		return
 	}
 
