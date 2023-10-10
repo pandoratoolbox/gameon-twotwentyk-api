@@ -196,7 +196,7 @@ func main() {
 
 	r.Route("/feed", func(r chi.Router) {
 		r.Get("/", handlers.SearchArticles)
-		r.Get("/personalised", handlers.SearchArticles)
+		r.Get("/personalised", handlers.GetArticlesPersonalised)
 	})
 
 	// blockchain
