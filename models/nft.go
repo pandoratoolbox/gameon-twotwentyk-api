@@ -22,6 +22,14 @@ const (
 	NFT_RARITY_RARE     = 2
 )
 
+const (
+	CARD_COLLECTION_STATUS_PENDING_METADATA = int64(0)
+	CARD_COLLECTION_STATUS_PENDING_CONFIG   = int64(1)
+	CARD_COLLECTION_STATUS_WAITING_AGG_PACK = int64(2)
+	CARD_COLLECTION_STATUS_READY            = int64(3)
+	CARD_COLLECTION_STATUS_LIVE             = int64(4)
+)
+
 type NftType struct {
 	Id              int
 	ContractAddress string
