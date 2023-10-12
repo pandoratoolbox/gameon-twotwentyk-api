@@ -1,48 +1,44 @@
 package nft
 
-import (
-	"gameon-twotwentyk-api/models"
-)
-
 const WALLET_KEY_PRIVATE = "wallet_key_private"
 
-type AggPack struct {
-	AmountNftCard          int64
-	AmountNftCardCelebrity int64
-	AmountNftCardCategory  int64
-	AmountNftCardDayMonth  int64
-	AmountNftCardTrigger   int64
-}
+// type AggPack struct {
+// 	AmountNftCard          int64
+// 	AmountNftCardCelebrity int64
+// 	AmountNftCardCategory  int64
+// 	AmountNftCardDayMonth  int64
+// 	AmountNftCardTrigger   int64
+// }
 
-type AggPackRaw struct {
-	Standard []map[int64]int64
-	Premium  []map[int64]int64
-	Elite    []map[int64]int64
-}
+// type AggPackRaw struct {
+// 	Standard []map[int64]int64
+// 	Premium  []map[int64]int64
+// 	Elite    []map[int64]int64
+// }
 
-type CollectionConfig struct {
-}
+// type CollectionConfig struct {
+// }
 
-type CollectionConfigTier struct {
-	CardAmount   int64
-	CardsPerPack []CollectionConfigCardsPerPack
-	Price        int64
-	Name         string
-}
+// type CollectionConfigTier struct {
+// 	CardAmount   int64
+// 	CardsPerPack []CollectionConfigCardsPerPack
+// 	Price        int64
+// 	Name         string
+// }
 
-type CollectionConfigCardsPerPack struct {
-	NftTypeId int64
-	Amount    int64
-}
+// type CollectionConfigCardsPerPack struct {
+// 	NftTypeId int64
+// 	Amount    int64
+// }
 
-type CollectionConfigPack struct {
-	Tiers []CollectionConfigTier
-}
+// type CollectionConfigPack struct {
+// 	Tiers []CollectionConfigTier
+// }
 
-func CreateCardCollection(data models.CardCollection, agg_pack AggPack) error {
+// func CreateCardCollection(data models.CardCollection, agg_pack AggPack) error {
 
-	return nil
-}
+// 	return nil
+// }
 
 // func OpenCardPack(ctx context.Context, card_collection_id int64, card_pack_id int64) error {
 

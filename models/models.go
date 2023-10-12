@@ -64,6 +64,22 @@ type CardSeries struct {
 	CardCollection    *CardCollection
 }
 
+type TransactionData struct {
+	CreatedAt   *time.Time
+	Id          *int64
+	SenderId    *int64
+	RecipientId *int64
+	Amount      *int64
+	Description *string
+	Status      *int64
+}
+
+type Transaction struct {
+	TransactionData
+	Sender    *User
+	Recipient *User
+}
+
 type NftCardDayMonthData struct {
 	Day          *int64
 	Month        *int64
@@ -100,14 +116,14 @@ type NftCardYear struct {
 }
 
 type VerificationData struct {
-	Id             *int64
-	UserId         *int64
-	CreatedAt      *time.Time
-	Code	       *string
-	Method    	   *string
+	Id        *int64
+	UserId    *int64
+	CreatedAt *time.Time
+	Code      *string
+	Method    *string
 }
 
-type Verification struct{
+type Verification struct {
 	VerificationData
 }
 
@@ -206,6 +222,8 @@ type NftCardCraftingData struct {
 	OwnerId      *int64
 	Rarity       *int64
 	CreatedAt    *time.Time
+	IsListed     *bool
+	Price        *int64
 }
 
 type NftCardCrafting struct {
@@ -218,7 +236,7 @@ type NftCardCrafting struct {
 type NftCardPredictionData struct {
 	IsClaimed       *bool
 	NftCardTriggers *[]NftCardTriggerData
-	NftIdentity     *NftCardIdentityData `json:"nft_identity"`
+	NftIdentity     *NftCardIdentityData
 	Triggers        *Strings
 	Id              *int64
 	CelebrityName   *string

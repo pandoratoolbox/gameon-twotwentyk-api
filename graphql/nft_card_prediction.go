@@ -200,6 +200,7 @@ func ListNftCardPredictionByOwnerId(ctx context.Context, id int64, filters model
 	q := fragment_nft_card_prediction + `query ListNftCardPredictionByOwnerId {
 		nft_card_prediction(%s) {
 			...NftCardPrediction
+			
 		}
 	}`
 

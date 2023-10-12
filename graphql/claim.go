@@ -152,10 +152,16 @@ func UpdateClaim(ctx context.Context, data models.Claim) error {
 func GetClaim(ctx context.Context, id int64) (models.Claim, error) {
 	var data models.Claim
 
-	q := fragment_claim + `
+	q := fragment_claim + fragment_nft_card_trigger + fragment_nft_card_prediction + `
 			query GetClaim {
 			claim(where: { id: { eq: $id } }) {
 				...Claim
+				nft_prediction {
+					...NftCardPrediction
+				}
+				nft_trigger {
+					...NftCardTrigger
+				}
 			}
 		}
 		`
@@ -197,9 +203,15 @@ func GetClaim(ctx context.Context, id int64) (models.Claim, error) {
 func ListClaimByClaimerId(ctx context.Context, id int64) ([]models.Claim, error) {
 	var out []models.Claim
 
-	q := fragment_claim + `query ListClaimByClaimerId {
+	q := fragment_claim + fragment_nft_card_prediction + fragment_nft_card_trigger + `query ListClaimByClaimerId {
 		claim(where: { claimer_id: { eq: $id }}) {
 						...Claim
+						nft_prediction {
+							...NftCardPrediction
+						}
+						nft_trigger {
+							...NftCardTrigger
+						}
 					}
 					}`
 
@@ -240,9 +252,15 @@ func ListClaimByClaimerId(ctx context.Context, id int64) ([]models.Claim, error)
 func ListClaimByArticleId(ctx context.Context, id int64) ([]models.Claim, error) {
 	var out []models.Claim
 
-	q := fragment_claim + `query ListClaimByArticleId {
+	q := fragment_claim + fragment_nft_card_prediction + fragment_nft_card_trigger + `query ListClaimByArticleId {
 		claim(where: { article_id: { eq: $id }}) {
 						...Claim
+						nft_prediction {
+							...NftCardPrediction
+						}
+						nft_trigger {
+							...NftCardTrigger
+						}
 					}
 					}`
 
@@ -279,11 +297,17 @@ func ListClaimByArticleId(ctx context.Context, id int64) ([]models.Claim, error)
 func ListClaim(ctx context.Context) ([]models.Claim, error) {
 	var out []models.Claim
 
-	q := fragment_claim + Fragment_user + `query ListClaim {
+	q := fragment_claim + Fragment_user + fragment_nft_card_prediction + fragment_nft_card_trigger + `query ListClaim {
 						claim {
 						...Claim
 						claimer {
 							username
+						}
+						nft_prediction {
+							...NftCardPrediction
+						}
+						nft_trigger {
+							...NftCardTrigger
 						}
 						}
 					}`

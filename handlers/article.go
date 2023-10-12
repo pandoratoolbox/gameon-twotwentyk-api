@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"fmt"
+	"gameon-twotwentyk-api/feed"
 	"gameon-twotwentyk-api/models"
 	"gameon-twotwentyk-api/store"
 	"net/http"
@@ -90,25 +92,65 @@ func DeleteArticle(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 }
 
+func Truncate(text string, width int) (string, error) {
+	if width < 0 {
+		return "", fmt.Errorf("invalid width size")
+	}
+
+	r := []rune(text)
+	trunc := r[:width]
+	return string(trunc) + "...", nil
+}
+
 func SearchArticles(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var out []models.Article
 
-	ctx := r.Context()
+	// q := chi.URLParam(r, "q")
+	// if q != "" {
+	// 	out, err = store.SearchArticles(ctx, q)
+	// 	if err != nil {
+	// 		ServeError(w, err.Error(), http.StatusInternalServerError)
+	// 		return
+	// 	}
+	// } else {
+	// 	out, err = store.ListArticles(ctx)
+	// 	if err != nil {
+	// 		ServeError(w, err.Error(), http.StatusInternalServerError)
+	// 		return
+	// 	}
+	// }
 
-	q := chi.URLParam(r, "q")
-	if q != "" {
-		out, err = store.SearchArticles(ctx, q)
-		if err != nil {
-			ServeError(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	} else {
-		out, err = store.ListArticles(ctx)
-		if err != nil {
-			ServeError(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	rows, err := feed.GetGlobalFeed()
+	if err != nil {
+		ServeError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, row := range rows {
+		// max := len(row.Text)
+		// if max > 100 {
+		// 	max = 100
+		// }
+
+		// excerpt, err := Truncate(row.Text, 200)
+		// if err != nil {
+		// 	ServeError(w, err.Error(), http.StatusInternalServerError)
+		// 	return
+		// }
+
+		excerpt := row.Text
+
+		out = append(out, models.Article{
+			ArticleData: models.ArticleData{
+				Id:           &row.Id,
+				Title:        &row.Title,
+				Url:          &row.Url,
+				CreatedAt:    row.Time,
+				ThumbnailSrc: &row.Image,
+				Excerpt:      &excerpt,
+			},
+		})
 	}
 
 	ServeJSON(w, out)

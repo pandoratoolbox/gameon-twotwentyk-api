@@ -2,8 +2,8 @@ package models
 
 import "time"
 
-// type CollectionCardPackConfig map[string]map[int64]CardPackConfig //tier - card pack id - card pack config
-type CardSeriesCardPackConfig map[int64]CardPackConfig
+type CollectionCardPackConfig []map[int64]CardPackConfig //tier index - card pack id - card pack config
+// type CardSeriesCardPackConfig map[int64]CardPackConfig
 
 // used to generate the collection - saved in database and factory contract
 
@@ -23,9 +23,9 @@ type CardCollectionData struct {
 	TriggerPrizePoolDistribution *TriggerPrizePoolDistribution // trigger tier - amount
 	Rarities                     *Strings
 	Tiers                        *Strings
-	// CollectionCards              CollectionCardPackConfig
-	Images    CardCollectionImages
-	CreatedAt *time.Time
+	CardPackConfig               CollectionCardPackConfig
+	Images                       CardCollectionImages
+	CreatedAt                    *time.Time
 }
 
 type CardCollectionImages struct {
@@ -60,7 +60,7 @@ type CardSeriesData struct {
 	Id               *int64
 	CardCollectionId *int64
 	Name             *string
-	CardPacks        CardSeriesCardPackConfig
+	// CardPacks        CardSeriesCardPackConfig
 	// Images           CardSeriesMetadataImages
 }
 
@@ -92,9 +92,10 @@ type CardPackConfig struct {
 	Changed    int
 	CardPackId int64
 	Tier       string
-	Contains   struct {
-		Rare     CardTypeValue
-		Core     CardTypeValue
-		Uncommon CardTypeValue
-	}
+	// Contains   struct {
+	// 	Rare     CardTypeValue
+	// 	Core     CardTypeValue
+	// 	Uncommon CardTypeValue
+	// }
+	Contains map[int64]CardTypeValue //rarity - card type - quantity
 }

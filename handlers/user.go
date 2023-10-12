@@ -59,7 +59,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	mid := ctx.Value(models.CTX_user_id).(int64)
 
 	input := struct {
-		PhoneNumber string `json:"phonenumber"`
+		PhoneNumber string `json:"phone_number"`
 		Username    string `json:"username"`
 		Name        string `json:"name"`
 		Password    string `json:"password"`
@@ -76,21 +76,21 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	if input.PhoneNumber != "" {
 		data.PhoneNumber = &input.PhoneNumber
-		
+
 		user, err := store.GetUser(r.Context(), mid)
 		if err != nil {
 			ServeError(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		code := fmt.Sprintf("%06d",  rand.Intn(999999 - 100000 + 1) + 100000)
+		code := fmt.Sprintf("%06d", rand.Intn(999999-100000+1)+100000)
 		method := "Phone"
 
 		verification := models.Verification{
 			VerificationData: models.VerificationData{
-				UserId:            	user.Id,
-				Code: 				&code,
-				Method: 			&method,
+				UserId: user.Id,
+				Code:   &code,
+				Method: &method,
 			},
 		}
 
@@ -120,7 +120,12 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	err = store.UpdateUser(ctx, data)
 	if err != nil {
-		ServeError(w, err.Error(), 400)
+		if data.Username != nil {
+			ServeError(w, "Username already exists", 400)
+			return
+		}
+
+		ServeError(w, err.Error(), 500)
 		return
 	}
 

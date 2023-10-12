@@ -87,7 +87,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func ResetPassword(w http.ResponseWriter, r *http.Request) {
-	emails.SendResetEmail("admin@pandoratoolbox.com")
+	// emails.SendResetEmail("admin@pandoratoolbox.com")
 }
 
 func Register(w http.ResponseWriter, r *http.Request) {
@@ -133,14 +133,14 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	code := fmt.Sprintf("%06d",  rand.Intn(999999 - 100000 + 1) + 100000)
+	code := fmt.Sprintf("%06d", rand.Intn(999999-100000+1)+100000)
 	method := "Email"
 
 	verification := models.Verification{
 		VerificationData: models.VerificationData{
-			UserId:            	user.Id,
-			Code: 				&code,
-			Method: 			&method,
+			UserId: user.Id,
+			Code:   &code,
+			Method: &method,
 		},
 	}
 

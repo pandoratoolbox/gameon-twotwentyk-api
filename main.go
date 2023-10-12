@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"gameon-twotwentyk-api/connections"
+	"gameon-twotwentyk-api/feed"
 	"gameon-twotwentyk-api/graphql"
 	"gameon-twotwentyk-api/handlers"
 	"gameon-twotwentyk-api/store"
@@ -175,7 +176,7 @@ func main() {
 
 	r.Route("/feed", func(r chi.Router) {
 		r.Get("/", handlers.SearchArticles)
-		r.Get("/personalised", handlers.GetArticlesPersonalised)
+		r.Get("/personalised", handlers.SearchArticles)
 	})
 
 	// blockchain

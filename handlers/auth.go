@@ -2,12 +2,14 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"gameon-twotwentyk-api/models"
 	"gameon-twotwentyk-api/store"
 	"gameon-twotwentyk-api/venly"
 	"net/http"
 
 	"github.com/Timothylock/go-signin-with-apple/apple"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/pandoratoolbox/json"
 
 	"google.golang.org/api/idtoken"
@@ -41,9 +43,11 @@ func AuthApple(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	spew.Dump(claims)
+
 	r_email, ok := claims.Get("email")
 	if !ok {
-		ServeError(w, "Error getting email from google id token claims", http.StatusInternalServerError)
+		ServeError(w, "Error getting email from apple id token claims", http.StatusInternalServerError)
 		return
 	}
 
@@ -198,7 +202,7 @@ func AuthGoogle(w http.ResponseWriter, r *http.Request) {
 func registerNewUser(ctx context.Context, user *models.User) error {
 	err := store.NewUser(ctx, user)
 	if err != nil {
-		return err
+		return errors.New("Username or email already exists")
 	}
 
 	wallet, err := venly.Global.CreateWallet(venly.VenlyRequestCreateWallet{
