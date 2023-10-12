@@ -62,7 +62,7 @@ func generateToken(verification *models.Verification) (string, error) {
 	return signedToken, nil
 }
 
-func SendResetEmail(to string, verification *models.Verification, user *models.User) error {
+func SendResetEmail(to string) error {
 	claims := ResetPasswordClaims{
 		Email: to,
 		StandardClaims: jwt.StandardClaims{
@@ -81,12 +81,12 @@ func SendResetEmail(to string, verification *models.Verification, user *models.U
 		From:       EMAIL_ADDRESS_NOREPLY,
 		To:         to,
 		Subject:    "Reset Password",
-		HTMLBody:   fmt.Sprintf(`<div>Hi, %s, 
+		HTMLBody:   fmt.Sprintf(`<div>Hi, 
 
 		Click Button to reset password
 
 		<button><a href="http://%s">Confirm Email Address</a></button>
-		</div>`, *user.Username, signedToken),
+		</div>`, signedToken),
 	}
 
 	fmt.Println(signedToken)

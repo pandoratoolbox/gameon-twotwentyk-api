@@ -8,6 +8,7 @@ import (
 	"gameon-twotwentyk-api/handlers"
 	"gameon-twotwentyk-api/store"
 	"gameon-twotwentyk-api/venly"
+	"gameon-twotwentyk-api/wsserver"
 	"log"
 	"net/http"
 
@@ -68,30 +69,9 @@ func main() {
 
 	venly.Global = c
 
-	feed.Init()
+	// wsserver.Manager = wsserver.NewClientManager()
 
-	// celebrities, err := store.ListCelebrity(context.Background())
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// var names []string
-	// for _, v := range celebrities {
-	// 	names = append(names, *v.Name)
-	// }
-
-	// news, err := feed.GetPersonalisedFeed(names)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// for _, v := range news {
-	// 	if v.IdentifiedText != nil {
-	// 		spew.Dump(v)
-	// 	}
-	// }
-
-	// os.Exit(0)
+	r.Get("/ws", wsserver.Manager.HandleConnection)
 
 	r.Get("/nft_card_day_month/{nft_card_day_month_id}", handlers.GetNftCardDayMonth)
 
@@ -179,7 +159,7 @@ func main() {
 		r.Get("/nft_card_crafting", handlers.ListNftCardCraftingForUserById)
 		r.Get("/card_pack", handlers.ListCardPackForUserById)
 		r.Post("/verify_password", handlers.VerifyPassword)
-		
+
 		r.Post("/verify_email", handlers.VerifyEmail)
 		r.Post("/verify_phonenumber", handlers.VerifyPhoneNumber)
 		r.Post("/verify_email_link/{token}", handlers.VerifyEmailByLink)
@@ -190,7 +170,7 @@ func main() {
 		r.Post("/register", handlers.Register)
 		r.Post("/google", handlers.AuthGoogle)
 		r.Post("/apple", handlers.AuthApple)
-		
+
 		r.Post("/reset_password", handlers.ResetPassword)
 	})
 
@@ -298,9 +278,9 @@ func main() {
 		})
 	})
 
-	r.Route("/ws", func(r chi.Router) {
-		// r.Connect("/", handlers.WebsocketUpgrade)
-	})
+	// r.Route("/ws", func(r chi.Router) {
+	// 	// r.Connect("/", handlers.WebsocketUpgrade)
+	// })
 
 	err = http.ListenAndServe(":3333", r)
 	if err != nil {
