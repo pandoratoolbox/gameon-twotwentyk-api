@@ -39,9 +39,14 @@ func CreateNftCollection(w http.ResponseWriter, r *http.Request) {
 		name = input.Name
 	}
 
+	tiers := models.Strings{"standard", "premium", "elite"}
+	rarities := models.Strings{"core", "uncommon", "rare"}
+
 	card_collection := models.CardCollection{
 		CardCollectionData: models.CardCollectionData{
-			Name: &name,
+			Name:     &name,
+			Tiers:    &tiers,
+			Rarities: &rarities,
 		},
 	}
 
@@ -49,6 +54,24 @@ func CreateNftCollection(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		ServeError(w, err.Error(), 500)
 		return
+	}
+
+	cost := int64(2000)
+
+	for _, tier := range tiers {
+		series := models.CardSeries{
+			CardSeriesData: models.CardSeriesData{
+				CardCollectionId: card_collection.Id,
+				Name:             &tier,
+				CostUsd:          &cost,
+			},
+		}
+
+		err = store.NewCardSeries(ctx, &series)
+		if err != nil {
+			ServeError(w, err.Error(), 500)
+			return
+		}
 	}
 
 	ServeJSON(w, card_collection)
