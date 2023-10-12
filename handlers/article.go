@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"gameon-twotwentyk-api/feed"
 	"gameon-twotwentyk-api/models"
@@ -141,13 +142,18 @@ func SearchArticles(w http.ResponseWriter, r *http.Request) {
 
 		excerpt := row.Text
 
+		id := row.Id
+		title := row.Title
+		url := row.Url
+		image := row.Image
+
 		out = append(out, models.Article{
 			ArticleData: models.ArticleData{
-				Id:           &row.Id,
-				Title:        &row.Title,
-				Url:          &row.Url,
+				Id:           &id,
+				Title:        &title,
+				Url:          &url,
 				CreatedAt:    row.Time,
-				ThumbnailSrc: &row.Image,
+				ThumbnailSrc: &image,
 				Excerpt:      &excerpt,
 			},
 		})
@@ -157,18 +163,72 @@ func SearchArticles(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetArticlesPersonalised(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	//get nft identity cards
-	//get list of names from identity cards
-	//get nft prediction cards
-	//get list of events and names from nft prediction cards
+	mid := r.Context().Value(models.CTX_user_id).(int64)
+	var err error
+	var out []models.Article
 
-	// q := ""
+	// q := chi.URLParam(r, "q")
+	// if q != "" {
+	// 	out, err = store.SearchArticles(ctx, q)
+	// 	if err != nil {
+	// 		ServeError(w, err.Error(), http.StatusInternalServerError)
+	// 		return
+	// 	}
+	// } else {
+	// 	out, err = store.ListArticles(ctx)
+	// 	if err != nil {
+	// 		ServeError(w, err.Error(), http.StatusInternalServerError)
+	// 		return
+	// 	}
+	// }
 
-	out, err := store.ListArticles(ctx)
+	predictions, err := store.ListNftCardPredictionByOwnerId(context.Background(), mid, models.NftCardPredictionFilter{})
+
 	if err != nil {
 		ServeError(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	celebrityNames := make([]string, 0)
+	for _, prediction := range predictions {
+		celebrityNames = append(celebrityNames, *prediction.CelebrityName)
+	}
+
+	rows, err := feed.GetPersonalisedFeed(celebrityNames)
+	if err != nil {
+		ServeError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, row := range rows {
+		// max := len(row.Text)
+		// if max > 100 {
+		// 	max = 100
+		// }
+
+		// excerpt, err := Truncate(row.Text, 200)
+		// if err != nil {
+		// 	ServeError(w, err.Error(), http.StatusInternalServerError)
+		// 	return
+		// }
+
+		excerpt := row.Text
+
+		id := row.Id
+		title := row.Title
+		url := row.Url
+		image := row.Image
+
+		out = append(out, models.Article{
+			ArticleData: models.ArticleData{
+				Id:           &id,
+				Title:        &title,
+				Url:          &url,
+				CreatedAt:    row.Time,
+				ThumbnailSrc: &image,
+				Excerpt:      &excerpt,
+			},
+		})
 	}
 
 	ServeJSON(w, out)

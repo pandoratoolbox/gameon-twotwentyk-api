@@ -100,22 +100,25 @@ func GetGlobalFeed() ([]FeedRow, error) {
 	return feed, nil
 }
 
-// func GetPersonalisedFeed(celebrity_names []string) ([]FeedRow, error) {
-// 	var feed []FeedRow
-// 	q := `SELECT * FROM news_analysis WHERE lower(identified_text::text)::text[] && lower(($1)::text)::text[] OR lower(identified_text::text)::text[] && lower(($1)::text)::text[] ORDER BY time DESC LIMIT 100;` //$1 = array of celeb names
-// 	rows, err := db.Query(context.Background(), q, celebrity_names)
-// 	if err != nil {
-// 		return feed, err
-// 	}
+func GetPersonalisedFeed(celebrity_names []string) ([]FeedRow, error) {
+	var feed []FeedRow
 
-// 	for rows.Next() {
-// 		var row FeedRow
-// 		err = rows.Scan(&row.Id, &row.Title, &row.Url, &row.Time, &row.Text, &row.Image, &row.Category, &row.Publisher, &row.DirectoryUrl, &row.IdentifiedText, &row.IdentifiedTitle, &row.IdentifiedTitleGpt)
-// 		if err != nil {
-// 			return feed, err
-// 		}
-// 		feed = append(feed, row)
-// 	}
+	q := `SELECT * FROM news_analysis WHERE lower(identified_text::text)::text[] && lower(($1)::text)::text[] OR lower(identified_text::text)::text[] && lower(($1)::text)::text[] ORDER BY time DESC LIMIT 100;` //$1 = array of celeb names
+	rows, err := db.Query(q, pq.Array(celebrity_names))
+	
+	if err != nil {
+		return feed, err
+	}
 
-// 	return feed, nil
-// }
+	for rows.Next() {
+		var row FeedRow
+
+		err = rows.Scan(&row.Id, &row.Title, &row.Url, &row.Time, &row.Text, &row.Image, &row.Category, &row.Publisher, &row.DirectoryUrl, pq.Array(&row.IdentifiedText), pq.Array(&row.IdentifiedTitle), pq.Array(&row.IdentifiedTitleGpt))
+		if err != nil {
+			return feed, err
+		}
+		feed = append(feed, row)
+	}
+
+	return feed, nil
+}
