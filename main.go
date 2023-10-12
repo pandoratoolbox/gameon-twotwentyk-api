@@ -69,6 +69,8 @@ func main() {
 
 	venly.Global = c
 
+	feed.Init()
+
 	// wsserver.Manager = wsserver.NewClientManager()
 
 	r.Get("/ws", wsserver.Manager.HandleConnection)

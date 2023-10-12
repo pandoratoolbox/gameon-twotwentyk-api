@@ -157,6 +157,7 @@ type User struct {
 	MarketplaceListing []*MarketplaceListing
 	NftCardDayMonth    []*NftCardDayMonth
 	NftCardCategory    []*NftCardCategory
+	Notification       []*Notification
 }
 
 type CardCollection struct {
@@ -251,6 +252,19 @@ type NftCardPrediction struct {
 	Owner              *User
 	MarketplaceListing []*MarketplaceListing
 	CardSeries         *CardSeries
+}
+
+type NotificationData struct {
+	Id          *int64
+	CreatedAt   *time.Time
+	RecipientId *int64
+	Payload     *map[string]interface{}
+	IsRead      *bool
+}
+
+type Notification struct {
+	NotificationData
+	Recipient *User
 }
 
 type ArticleSourceData struct {
